@@ -1,9 +1,10 @@
 # frozen_string_literal: true
 
 def missing(sorted_integers)
-  first = sorted_integers.first
-  last = sorted_integers.last
-  (first..last).reject { |n| sorted_integers.include?(n) }
+  sorted_integers.each_cons(2).with_object([]) do |(first, second), result|
+    between_range = (first + 1)..(second - 1)
+    result.concat(between_range.to_a)
+  end
 end
 
 p missing([-3, -2, 1, 5]) == [-1, 0, 2, 3, 4]
