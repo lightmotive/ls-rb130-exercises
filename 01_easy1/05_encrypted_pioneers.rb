@@ -16,8 +16,7 @@ module Decryption
     private
 
     def translate_rot13_char(char)
-      char.tr('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz',
-              'NOPQRSTUVWXYZABCDEFGHIJKLMnopqrstuvwxyzabcdefghijklm')
+      char.tr('A-MN-Za-mn-z', 'N-ZA-Mn-za-m')
     end
   end
 end
