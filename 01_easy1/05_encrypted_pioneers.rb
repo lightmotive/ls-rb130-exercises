@@ -25,11 +25,7 @@ end
 # Use the Decryption module to patch `String` only through the end of this file.
 using Decryption
 
-inputs = ['Nqn Ybirynpr', 'Tenpr Ubccre', 'Nqryr Tbyqfgvar', 'Nyna Ghevat',
-          'Puneyrf Onoontr', 'Noqhyynu Zhunzznq ova Zhfn ny-Xujnevmzv',
-          'Wbua Ngnanfbss', 'Ybvf Unvog', 'Pynhqr Funaaba', 'Fgrir Wbof',
-          'Ovyy Tngrf', 'Gvz Orearef-Yrr', 'Fgrir Jbmavnx', 'Xbaenq Mhfr',
-          'Fve Nagbal Ubner', 'Zneiva Zvafxl', 'Lhxvuveb Zngfhzbgb',
-          'Unllvz Fybavzfxv', 'Tregehqr Oynapu']
+input = File.new('05_encrypted_pioneers_input.txt').each.map(&:decrypt_rot13)
+expected_output = File.new('05_encrypted_pioneers_expected_output.txt').to_a
 
-p inputs.map(&:decrypt_rot13)
+p input == expected_output
