@@ -6,6 +6,8 @@ def all?(enumerable)
   true
 end
 
+return unless __FILE__ == $PROGRAM_NAME
+
 p all?([1, 3, 5, 6]) { |value| value.odd? } == false
 p all?([1, 3, 5, 7]) { |value| value.odd? } == true
 p all?([2, 4, 6, 8]) { |value| value.even? } == true
