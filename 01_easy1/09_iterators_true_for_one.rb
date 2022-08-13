@@ -3,7 +3,7 @@
 def one?(enumerable)
   seen_one = false
 
-  enumerable.each do |args|
+  enumerable.each do |*args|
     next unless yield(*args)
     return false if seen_one
 
