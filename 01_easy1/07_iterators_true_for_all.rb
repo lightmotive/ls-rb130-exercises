@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 def all?(enumerable)
-  enumerable.each { |*args| return false unless yield(*args) }
+  enumerable.each { |args| return false unless yield(*args) }
 
   true
 end
