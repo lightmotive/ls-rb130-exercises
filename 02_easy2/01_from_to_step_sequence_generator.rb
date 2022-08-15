@@ -10,8 +10,11 @@ def step(start_num, end_num, step)
 
     current_num += step
   end
+
+  start_num..end_num # Return a Range to align with Core behavior.
 end
 
-step(1, 10, 3) { |value| puts "value = #{value}" }
+rng = step(1, 10, 3) { |value| puts "value = #{value}" }
+p rng
 p(step(1, 10, 3).map { |value| "value = #{value}" } ==
   ['value = 1', 'value = 4', 'value = 7', 'value = 10'])
