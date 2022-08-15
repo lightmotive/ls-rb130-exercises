@@ -12,5 +12,6 @@ def step(start_num, end_num, step)
   end
 end
 
+step(1, 10, 3) { |value| puts "value = #{value}" }
 p(step(1, 10, 3).map { |value| "value = #{value}" } ==
   ['value = 1', 'value = 4', 'value = 7', 'value = 10'])
