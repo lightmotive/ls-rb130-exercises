@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
 def max_by(enumerable)
-  max = nil
+  compare_max = nil
   item_max_by = nil
 
   enumerable.each do |item|
     compare_value = yield(item)
-    if max.nil? || compare_value > max
-      max = compare_value
+    if compare_max.nil? || compare_value > compare_max
+      compare_max = compare_value
       item_max_by = item
     end
   end
