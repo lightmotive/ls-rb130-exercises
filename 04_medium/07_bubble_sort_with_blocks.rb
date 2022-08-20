@@ -71,8 +71,7 @@ p array == %w[alice bonnie Kim Pete rachel sue Tyler]
 
 # Further exploration:
 def bubble_sort_by!(array)
-  sort = proc { |first, second| yield(first) <=> yield(second) }
-  bubble_sort!(array, &sort)
+  bubble_sort!(array) { |first, second| yield(first) <=> yield(second) }
 end
 
 array = %w[sue Pete alice Tyler rachel Kim bonnie]
