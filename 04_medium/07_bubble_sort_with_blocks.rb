@@ -68,3 +68,13 @@ p array == %w[Kim Pete Tyler alice bonnie rachel sue]
 array = %w[sue Pete alice Tyler rachel Kim bonnie]
 bubble_sort!(array) { |first, second| first.downcase <=> second.downcase }
 p array == %w[alice bonnie Kim Pete rachel sue Tyler]
+
+# Further exploration:
+def bubble_sort_by!(array)
+  sort = proc { |first, second| yield(first) <=> yield(second) }
+  bubble_sort!(array, &sort)
+end
+
+array = %w[sue Pete alice Tyler rachel Kim bonnie]
+bubble_sort_by!(array, &:downcase)
+p array == %w[alice bonnie Kim Pete rachel sue Tyler]
