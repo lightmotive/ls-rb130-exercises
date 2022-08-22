@@ -9,10 +9,9 @@ require './cash_register'
 
 class CashRegisterTest < MiniTest::Test
   def setup
-    @default_item_cost = 1
+    @default_item_cost = 30
     @transaction = Transaction.new(@default_item_cost)
-    @transaction.amount_paid = @default_item_cost
-    @default_total_money = 100
+    @default_total_money = 1200
     @register = CashRegister.new(@default_total_money)
   end
 
@@ -22,6 +21,7 @@ class CashRegisterTest < MiniTest::Test
   end
 
   def test_accept_money
+    @transaction.amount_paid = @default_item_cost
     @register.accept_money(@transaction)
     assert_equal(@default_total_money + @transaction.amount_paid, @register.total_money)
   end
