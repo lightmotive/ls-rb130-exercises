@@ -12,15 +12,17 @@ class TransactionTest < MiniTest::Test
 
   def test_prompt_for_payment_exact
     input = StringIO.new("#{@item_cost}\n")
+    output = StringIO.new
 
-    assert_output(@you_owe_stdout) do
-      @transaction.prompt_for_payment(input: input)
-    end
+    @transaction.prompt_for_payment(input: input, output: output)
     assert_equal(@item_cost, @transaction.amount_paid)
+    output.rewind
+    assert_equal(@you_owe_stdout, output.read)
   end
 
   def test_prompt_for_payment_invalid
     input = StringIO.new("-10\n20\n30\n")
+    output = StringIO.new
 
     incorrect_amount_stdout_sequence = "#{@invalid_amount_stdout}#{@you_owe_stdout}"
     expected_stdout = <<~STDOUT.chomp
@@ -28,16 +30,15 @@ class TransactionTest < MiniTest::Test
       #{incorrect_amount_stdout_sequence * 2}
     STDOUT
 
-    assert_output(expected_stdout) do
-      @transaction.prompt_for_payment(input: input)
-    end
-
+    @transaction.prompt_for_payment(input: input, output: output)
     assert_equal(@item_cost, @transaction.amount_paid)
+    output.rewind
+    assert_equal(expected_stdout, output.read)
   end
 
   def test_prompt_for_payment_over
     input = StringIO.new("40\n")
-    @transaction.prompt_for_payment(input: input)
+    @transaction.prompt_for_payment(input: input, output: StringIO.new)
     assert_equal(40, @transaction.amount_paid)
   end
 end
