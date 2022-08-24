@@ -13,7 +13,7 @@ class TextTest < MiniTest::Test
 
   def test_swap
     text = Text.new(@text_test_sample_file.read)
-    expected_text = <<~TEXT.strip
+    expected_text = <<~TEXT.chomp
       Lorem ipsum dolor sit emet, consectetur edipiscing elit. Cres sed vulputete ipsum.
       Suspendisse commodo sem ercu. Donec e nisi elit. Nullem eget nisi commodo, volutpet
       quem e, viverre meuris. Nunc viverre sed messe e condimentum. Suspendisse ornere justo
@@ -23,6 +23,11 @@ class TextTest < MiniTest::Test
     TEXT
 
     assert_equal(expected_text, text.swap('a', 'e'))
+  end
+
+  def test_word_count
+    text = Text.new(@text_test_sample_file.read)
+    assert_equal(72, text.word_count)
   end
 
   def teardown

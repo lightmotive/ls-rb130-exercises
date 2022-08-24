@@ -8,4 +8,8 @@ class Text
   def swap(letter_one, letter_two)
     @text.gsub(letter_one, letter_two)
   end
+
+  def word_count
+    @text.split.count
+  end
 end
