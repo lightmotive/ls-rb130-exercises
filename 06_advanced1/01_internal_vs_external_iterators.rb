@@ -1,22 +1,25 @@
 # frozen_string_literal: true
 
-def factorial_iterator
-  factorial = 0
-  value = 1
+def create_factorial_enumerator
+  Enumerator.new do |yielder|
+    factorial = 0
+    value = 1
 
-  loop do
-    yield value
-    factorial += 1
-    value *= factorial
+    loop do
+      yielder << value
+      factorial += 1
+      value *= factorial
+    end
   end
 end
 
-factorial_enumerator = enum_for(:factorial_iterator)
+factorial_enumerator = create_factorial_enumerator
 
 puts 'Output first 5 factorials:'
 5.times { puts factorial_enumerator.next }
 puts '2 more:', factorial_enumerator.next, factorial_enumerator.next
 
+puts
 puts '[Rewind]'
 factorial_enumerator.rewind
 
