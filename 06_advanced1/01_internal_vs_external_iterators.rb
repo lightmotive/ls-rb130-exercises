@@ -1,19 +1,15 @@
 # frozen_string_literal: true
 
-def create_factorial_enumerator
-  Enumerator.new do |yielder|
-    factorial = 0
-    value = 1
+factorial_enumerator = Enumerator.new do |yielder|
+  factorial = 0
+  value = 1
 
-    loop do
-      yielder << value
-      factorial += 1
-      value *= factorial
-    end
+  loop do
+    yielder << value
+    factorial += 1
+    value *= factorial
   end
 end
-
-factorial_enumerator = create_factorial_enumerator
 
 puts 'Output first 5 factorials:'
 5.times { puts factorial_enumerator.next }
