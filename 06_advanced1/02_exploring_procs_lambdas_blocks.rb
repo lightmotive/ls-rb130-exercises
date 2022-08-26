@@ -44,7 +44,15 @@ def block_method_1(_animal)
 end
 
 block_method_1('seal') { |seal| puts "This is a #{seal}." }
+# - That demonstrates the lenient arity of blocks. `block_method_1` doesn't
+#   pass any arguments to a block that defined one parameter; it assigns
+#   the parameter value to `nil` when there's no corresponding argument.
 block_method_1('seal')
+# => 02_exploring_procs_lambdas_blocks.rb:43:in `block_method_1': no block given (yield) (LocalJumpError)
+#            from 02_exploring_procs_lambdas_blocks.rb:47:in `<main>'
+# - `yield`ing when no block was passed will raise a `LocalJumpError` exception.
+#   If one wants to define a method that optionally `yield`s, they can write
+#   something like `yield if block_given?` (Kernel#block_given?).
 
 # Group 4
 def block_method_2(animal)
@@ -52,7 +60,18 @@ def block_method_2(animal)
 end
 
 block_method_2('turtle') { |turtle| puts "This is a #{turtle}." }
+# => This is a turtle.
+# - Our method is now "complete."
 block_method_2('turtle') do |turtle, seal|
   puts "This is a #{turtle} and a #{seal}."
 end
+# => This is a turtle and a .
+# - The method `yield`s only one argument, but the block defines two parameters.
+#   Due to a block's lenient arity, the block simply initializes and assigns
+#   `nil` to any parameters that don't have a corresponding argument.
 block_method_2('turtle') { puts "This is a #{animal}." }
+# => 02_exploring_procs_lambdas_blocks.rb:66:in `block in <main>': undefined
+#    local variable or method `animal' for main:Object (NameError)
+# - That demonstrates how blocks don't have access to the yielding method's
+#   local variable scope. Blocks only have access to the scope where they were
+#   defined.
