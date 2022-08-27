@@ -36,7 +36,7 @@ class Triangle
 
   def validate_sides
     raise ArgumentError, 'Must provide 3 sides as separate arguments.' unless sides.length == 3
-    raise ArgumentError, 'All side lengths must be greater than 0.' unless sides.all?(&:positive?)
+    raise ArgumentError, 'All side lengths must be greater than 0.' unless sides.min.positive?
 
     unless side_lengths_valid?
       raise ArgumentError,
