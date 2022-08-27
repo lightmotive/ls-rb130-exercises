@@ -45,14 +45,11 @@ class Triangle
   end
 
   # Sum of any 2 sides must be greater than the length of the 3rd side.
+  # Shortcut available when side lengths are sorted:
+  # - Sum of the 2 shortest side lengths must be greater than the longest side length.
   def side_lengths_valid?
-    is_sequence_valid = ->(sides) { sides.first(2).sum > sides.last }
-
-    sides_rotated = sides
-    [0, 1, 1].all? do |rotate_count|
-      sides_rotated = sides_rotated.rotate(rotate_count)
-      is_sequence_valid.call(sides_rotated)
-    end
+    sorted = sides.sort
+    sorted.first(2).sum > sorted.last
   end
 
   def determine_kind
@@ -63,3 +60,29 @@ class Triangle
             end
   end
 end
+
+# class Triangle2
+#   def initialize(one, two, three)
+#     @arr = [one, two, three].sort
+#     raise ArgumentError if @arr.any? { |x| x <= 0 } || @arr[0] + @arr[1] <= @arr[2]
+#   end
+
+#   def kind
+#     return 'equilateral' if @arr.uniq.length == 1
+
+#     @arr.uniq.length == 2 ? 'isosceles' : 'scalene'
+#   end
+# end
+
+# require_relative '../../ruby-common/benchmark_report'
+
+# TESTS = [{ input: [2, 2, 2], expected_output: 'equilateral' },
+#          { input: [10, 10, 10], expected_output: 'equilateral' },
+#          { input: [4, 4, 3], expected_output: 'isosceles' },
+#          { input: [20, 20, 17], expected_output: 'isosceles' },
+#          { input: [5, 4, 3], expected_output: 'scalene' },
+#          { input: [12, 11, 10], expected_output: 'scalene' }]
+
+# benchmark_report(5, 5, TESTS,
+#                  [{ label: 'Triangle', method: ->(input) { Triangle.new(*input).kind } },
+#                   { label: 'Triangle2', method: ->(input) { Triangle2.new(*input).kind } }])
