@@ -58,7 +58,7 @@ class Triangle
     @kind = case sides.uniq.count
             when 1 then 'equilateral'
             when 2 then 'isosceles'
-            when 3 then 'scalene'
+            else 'scalene'
             end
   end
 end
