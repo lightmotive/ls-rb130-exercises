@@ -47,11 +47,12 @@ class Triangle
   # Sum of any 2 sides must be greater than the length of the 3rd side.
   def side_lengths_valid?
     is_sequence_valid = ->(sides) { sides.first(2).sum > sides.last }
-    return false unless is_sequence_valid.call(sides)
-    return false unless is_sequence_valid.call(sides.rotate)
-    return false unless is_sequence_valid.call(sides.rotate)
 
-    true
+    sides_rotated = sides
+    [0, 1, 1].all? do |rotate_count|
+      sides_rotated = sides_rotated.rotate(rotate_count)
+      is_sequence_valid.call(sides_rotated)
+    end
   end
 
   def determine_kind
