@@ -60,4 +60,22 @@ class AnagramTest < Minitest::Test
     anagrams = detector.match %w[cashregister Carthorse radishes]
     assert_equal ['Carthorse'], anagrams
   end
+
+  def test_word_to_phrase_comparison
+    detector = Anagram.new('anagram')
+    anagrams = detector.match ['Nag a ram']
+    assert_equal ['Nag a ram'], anagrams
+  end
+
+  def test_phrase_to_word_comparison
+    detector = Anagram.new('Ars magna')
+    anagrams = detector.match %w[anagrams phase]
+    assert_equal ['anagrams'], anagrams
+  end
+
+  def test_phrase_to_phrase_comparison
+    detector = Anagram.new('forty five')
+    anagrams = detector.match ['over fifty', 'twenty seven']
+    assert_equal ['over fifty'], anagrams
+  end
 end
