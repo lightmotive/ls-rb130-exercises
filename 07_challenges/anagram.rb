@@ -23,33 +23,31 @@
 # Class and basic iteration written first, then fleshed out.
 
 class Anagram
-  attr_reader :string
+  attr_reader :string_original
 
   def initialize(string)
-    @string = string
-    @string_for_comparison = string_for_comparison(@string)
+    @string_original = string
+    @string_for_straight_cmp = standardize_for_straight_cmp(string)
+    @string_for_anagram_cmp = standardize_for_anagram_cmp(string)
   end
 
   def match(words_or_phrases)
-    anagrams = []
-    # - They are words or phrases that rearrange letters of other words or phrases.
+    words_or_phrases.each_with_object([]) do |candidate, anagrams|
+      next if @string_for_straight_cmp == standardize_for_straight_cmp(candidate)
 
-    words_or_phrases.each do |candidate|
-      # - Ignore identical words.
-
-      candidate_for_comparison = string_for_comparison(candidate)
-      # - The rearrangements use each letter exactly once.
+      anagrams << candidate if string_for_anagram_cmp == standardize_for_anagram_cmp(candidate)
     end
-
-    anagrams
   end
 
   private
 
-  attr_reader :string_for_comparison
+  attr_reader :string_for_straight_cmp, :string_for_anagram_cmp
 
-  def string_for_comparison(string)
-    # - Anagrams are case-insensitive.
-    # - Ignore spaces in both the input and when checking the output.
+  def standardize_for_straight_cmp(string)
+    string.downcase
+  end
+
+  def standardize_for_anagram_cmp(string)
+    string.gsub(/\s+/, '').downcase.chars.sort.join
   end
 end
