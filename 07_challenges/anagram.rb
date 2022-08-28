@@ -23,27 +23,27 @@
 # Class and basic iteration written first, then fleshed out.
 
 class Anagram
-  attr_reader :string_original
+  attr_reader :subject
 
-  def initialize(string)
-    @string_original = string
-    @string_for_straight_cmp = standardize_for_straight_cmp(string)
-    @string_for_anagram_cmp = standardize_for_anagram_cmp(string)
+  def initialize(subject)
+    @subject = subject
+    @subject_for_dup_cmp = standardize_for_dup_cmp(subject)
+    @subject_for_anagram_cmp = standardize_for_anagram_cmp(subject)
   end
 
   def match(words_or_phrases)
     words_or_phrases.each_with_object([]) do |candidate, anagrams|
-      next if @string_for_straight_cmp == standardize_for_straight_cmp(candidate)
+      next if @subject_for_dup_cmp == standardize_for_dup_cmp(candidate)
 
-      anagrams << candidate if string_for_anagram_cmp == standardize_for_anagram_cmp(candidate)
+      anagrams << candidate if subject_for_anagram_cmp == standardize_for_anagram_cmp(candidate)
     end
   end
 
   private
 
-  attr_reader :string_for_straight_cmp, :string_for_anagram_cmp
+  attr_reader :subject_for_dup_cmp, :subject_for_anagram_cmp
 
-  def standardize_for_straight_cmp(string)
+  def standardize_for_dup_cmp(string)
     string.downcase
   end
 
