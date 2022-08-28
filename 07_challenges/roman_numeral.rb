@@ -44,17 +44,68 @@
 #
 # private
 #
-# def roman_numerals(number)
+# def roman_numerals(unit_number)
 #   numerals = ''
 #   Iterate through (0...NUMERALS.size) as |numeral_idx|:
 #     numeral, unit = NUMERALS[numeral_idx]
 #     previous_numeral, previous_unit = NUMERALS[numeral_idx - 1] unless numeral_idx.zero?
-#     - Skip if number < unit
+#     - Skip if unit_number < unit
 #
-#     if number == (previous_unit - unit)
+#     if unit_number == (previous_unit - unit)
 #       numerals += "#{numeral}#{previous_numeral}"
 #     else
-#       while number >= unit
+#       while unit_number >= unit
 #         numerals += numeral
-#         number -= unit
+#         unit_number -= unit
+#
+#   return numerals
 # end
+
+class RomanNumeral
+  NUMERALS = [
+    ['M', 1000],
+    ['D', 500],
+    ['C', 100],
+    ['L', 50],
+    ['X', 10],
+    ['V', 5],
+    ['I', 1]
+  ].freeze
+  POSITION_MULTIPLIER = [1000, 100, 10, 1].freeze
+
+  attr_reader :integer
+
+  def initialize(integer)
+    @integer = integer
+  end
+
+  def to_roman
+    # - Initialize `numerals = ''`
+    # - integer_string = integer.to_s.rjust(4, "0")
+    # 0..3 { |pos_idx|
+    #   pos_value = integer_string[pos_idx].to_i
+    #   - skip if pos_value.zero?
+    #   pos_value *= POSITION_MULTIPLIER[pos_idx]
+    #   - numerals += roman_numerals(pos_value)
+    # }
+  end
+
+  private
+
+  def roman_numerals(unit_number)
+    #   numerals = ''
+    #   Iterate through (0...NUMERALS.size) as |numeral_idx|:
+    #     numeral, unit = NUMERALS[numeral_idx]
+    #     previous_numeral, previous_unit = NUMERALS[numeral_idx - 1] unless numeral_idx.zero?
+    #     - Skip if unit_number < unit
+    #
+    #     if unit_number == (previous_unit - unit)
+    #       numerals += "#{numeral}#{previous_numeral}"
+    #     else
+    #       while unit_number >= unit
+    #         numerals += numeral
+    #         unit_number -= unit
+    #
+    #   return numerals
+  end
+end
