@@ -33,16 +33,14 @@
 # ]
 # ** Previous algorithm deleted. **
 
-require 'pry'
-
 class RomanNumeral
-  NUMERALS = { 'M' => 1000, 'CM' => 900,
-               'D' => 500, 'CD' => 400,
-               'C' => 100, 'XC' => 90,
-               'L' => 50, 'XL' => 40,
-               'X' => 10, 'IX' => 9,
-               'V' => 5, 'IV' => 4,
-               'I' => 1 }.freeze
+  NUMERALS = [['M', 1000], ['CM', 900],
+              ['D', 500], ['CD', 400],
+              ['C', 100], ['XC', 90],
+              ['L', 50], ['XL', 40],
+              ['X', 10], ['IX', 9],
+              ['V', 5], ['IV', 4],
+              ['I', 1]].freeze
 
   attr_reader :integer
 
@@ -58,7 +56,7 @@ class RomanNumeral
 
       while remaining >= numeral_unit
         numeral_count, remaining = remaining.divmod(numeral_unit)
-        numerals << numeral.to_s * numeral_count
+        numerals << numeral * numeral_count
       end
     end
   end
