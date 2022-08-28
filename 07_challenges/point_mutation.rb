@@ -10,9 +10,8 @@
 # Convert each string (strand) to a separate arrays of chars for comparison.
 
 # Basic algorithm:
-# - Convert each strand to an array of chars.
-# - Iterate through the shortest array with index.
-#   - Count differences across arrays, comparing each letter at each index.
+# - Iterate through the shortest string's indices.
+#   - Count differences across strings, comparing each letter at each index.
 
 class DNA
   attr_reader :strand
@@ -22,12 +21,11 @@ class DNA
   end
 
   def hamming_distance(other_strand)
-    first_chars = strand.chars
-    second_chars = other_strand.chars
-    first_chars, second_chars = [first_chars, second_chars].minmax_by(&:size) if first_chars.size != second_chars.size
-
-    first_chars.each_with_index.reduce(0) do |distance, (char, idx)|
-      distance + (char == second_chars[idx] ? 0 : 1)
+    shortest_length = strand.size < other_strand.size ? strand.size : other_strand.size
+    distance = 0
+    shortest_length.times do |idx|
+      distance += 1 unless strand[idx] == other_strand[idx]
     end
+    distance
   end
 end
