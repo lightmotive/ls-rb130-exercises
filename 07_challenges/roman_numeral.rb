@@ -31,50 +31,18 @@
 #   ['V', 5],
 #   ['I', 1]
 # ]
-# POSITION_MULTIPLIER = [1000, 100, 10, 1]
-# def to_roman
-#   Given an `integer` during class init:
-#   - Initialize `numerals = ''`
-#   - integer_string = integer.to_s.rjust(4, "0")
-#   0..3 { |pos_idx|
-#     pos_value = integer_string[pos_idx].to_i
-#     - skip if pos_value.zero?
-#     pos_value *= POSITION_MULTIPLIER[pos_idx]
-#     - numerals += roman_numerals(pos_value)
-#   }
-#   - Return numerals
-# end
-#
-# private
-#
-# def roman_numerals(unit_number)
-#   numerals = ''
-#   Iterate through (0...NUMERALS.size) as |numeral_idx|:
-#     numeral, unit = NUMERALS[numeral_idx]
-#     previous_numeral, previous_unit = NUMERALS[numeral_idx - 1] unless numeral_idx.zero?
-#     - Skip if unit_number < unit
-#
-#     if unit_number == (previous_unit - unit)
-#       numerals += "#{numeral}#{previous_numeral}"
-#     else
-#       while unit_number >= unit
-#         numerals += numeral
-#         unit_number -= unit
-#
-#   return numerals
-# end
+# ** Previous algorithm deleted. **
 
 require 'pry'
 
 class RomanNumeral
-  NUMERALS = { M: 1000, CM: 900,
-               D: 500, CD: 400,
-               C: 100, XC: 90,
-               L: 50, XL: 40,
-               X: 10, IX: 9,
-               V: 5, IV: 4,
-               I: 1 }.freeze
-  POSITION_MULTIPLIER = [1000, 100, 10, 1].freeze
+  NUMERALS = { 'M' => 1000, 'CM' => 900,
+               'D' => 500, 'CD' => 400,
+               'C' => 100, 'XC' => 90,
+               'L' => 50, 'XL' => 40,
+               'X' => 10, 'IX' => 9,
+               'V' => 5, 'IV' => 4,
+               'I' => 1 }.freeze
 
   attr_reader :integer
 
@@ -83,32 +51,14 @@ class RomanNumeral
   end
 
   def to_roman
-    numerals = ''
-
-    integer_string = integer.to_s.rjust(4, '0')
-    (0..3).each do |pos_idx|
-      pos_value = integer_string[pos_idx].to_i
-      next if pos_value.zero?
-
-      unit_integer = pos_value * POSITION_MULTIPLIER[pos_idx]
-      numerals += unit_roman_numerals(unit_integer)
-    end
-
-    numerals
-  end
-
-  private
-
-  def unit_roman_numerals(unit_integer)
-    unit_match = NUMERALS.key(unit_integer)
-    return unit_match.to_s unless unit_match.nil?
+    remaining = integer
 
     NUMERALS.each_with_object(String.new) do |(numeral, numeral_unit), numerals|
-      next if unit_integer < numeral_unit
+      next if remaining < numeral_unit
 
-      while unit_integer >= numeral_unit
-        numerals << numeral.to_s
-        unit_integer -= numeral_unit
+      while remaining >= numeral_unit
+        numeral_count, remaining = remaining.divmod(numeral_unit)
+        numerals << numeral.to_s * numeral_count
       end
     end
   end
