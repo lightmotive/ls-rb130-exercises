@@ -32,16 +32,18 @@ class Anagram
   end
 
   def match(words_or_phrases)
-    words_or_phrases.each_with_object([]) do |candidate, anagrams|
-      next if @subject_for_dup_cmp == standardize_for_dup_cmp(candidate)
-
-      anagrams << candidate if subject_for_anagram_cmp == standardize_for_anagram_cmp(candidate)
-    end
+    words_or_phrases.select(&method(:anagram_of_subject?))
   end
 
   private
 
   attr_reader :subject_for_dup_cmp, :subject_for_anagram_cmp
+
+  def anagram_of_subject?(candidate)
+    return false if standardize_for_dup_cmp(candidate) == subject_for_dup_cmp
+
+    standardize_for_anagram_cmp(candidate) == subject_for_anagram_cmp
+  end
 
   def standardize_for_dup_cmp(string)
     string.downcase
