@@ -35,15 +35,15 @@ class Anagram
     words_or_phrases.select(&method(:anagram_of_subject?))
   end
 
-  private
-
-  attr_reader :subject_for_dup_cmp, :subject_for_anagram_cmp
-
   def anagram_of_subject?(candidate)
     return false if standardize_for_dup_cmp(candidate) == subject_for_dup_cmp
 
     standardize_for_anagram_cmp(candidate) == subject_for_anagram_cmp
   end
+
+  private
+
+  attr_reader :subject_for_dup_cmp, :subject_for_anagram_cmp
 
   def standardize_for_dup_cmp(string)
     string.downcase
