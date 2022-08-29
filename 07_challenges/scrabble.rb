@@ -22,7 +22,7 @@
 class Scrabble
   attr_reader :word
 
-  LETTER_SCORES = [
+  LETTERS_SCORE = [
     ['AEIOULNRST', 1],
     ['DG', 2],
     ['BCMP', 3],
@@ -39,10 +39,10 @@ class Scrabble
   def score
     return 0 if word.nil?
 
-    word_up = word.upcase
+    word_upcase = word.upcase
 
-    LETTER_SCORES.reduce(0) do |total_score, (letters, score_per_letter)|
-      total_score + word_up.count(letters) * score_per_letter
+    LETTERS_SCORE.reduce(0) do |total_score, (letters, score_per_letter)|
+      total_score + word_upcase.count(letters) * score_per_letter
     end
   end
 
