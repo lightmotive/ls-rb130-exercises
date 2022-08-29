@@ -9,7 +9,7 @@
 # - Create class and instance methods with same name: `score`
 
 # Data structure:
-# - None required other than class
+# - Store [letters_string, score] pairs in an array, then loop through array.
 
 # Basic algorithm:
 # Given a `word` (string):
@@ -20,5 +20,33 @@
 # - To implement Scrabble::score, instantiate: `Score.new(word).score`.
 
 class Scrabble
-  def initialize; end
+  attr_reader :word
+
+  LETTER_SCORES = [
+    ['AEIOULNRST', 1],
+    ['DG', 2],
+    ['BCMP', 3],
+    ['FHVWY', 4],
+    ['K', 5],
+    ['JX', 8],
+    ['QZ', 10]
+  ].freeze
+
+  def initialize(word)
+    @word = word
+  end
+
+  def score
+    return 0 if word.nil?
+
+    word_up = word.upcase
+
+    LETTER_SCORES.reduce(0) do |total_score, (letters, score_per_letter)|
+      total_score + word_up.count(letters) * score_per_letter
+    end
+  end
+
+  def self.score(word)
+    Scrabble.new(word).score
+  end
 end
