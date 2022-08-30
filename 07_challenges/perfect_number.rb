@@ -18,3 +18,31 @@
 # Given `number`:
 # 1. Determine positive divisors excluding number, store in array (helper method)
 # 2. Compare positive divisors sum with number to determine 'perfect', 'abundant', or 'deficient'
+
+class PerfectNumber
+  attr_reader :number
+
+  def initialize(number)
+    raise ArgumentError, 'Number must be a positive integer.' unless number.instance_of(Integer) && number.positive?
+
+    @number = number
+  end
+
+  def classify
+    # ...
+  end
+
+  def self.classify(number)
+    new(number).classify
+  end
+
+  private
+
+  def aliquot_divisors
+    # 1. Determine positive divisors excluding number, store in array (helper method)
+  end
+
+  def classification(aliquot_sum)
+    # 2. Compare positive divisors sum with number to determine 'perfect', 'abundant', or 'deficient'
+  end
+end
