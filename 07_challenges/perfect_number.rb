@@ -41,8 +41,8 @@ class PerfectNumber
   private
 
   def aliquot_divisors
-    (number - 1).downto(1).with_object([]) do |n, divisors|
-      divisors << n if (number % n).zero?
+    (1...number).select do |possible_divisor|
+      (number % possible_divisor).zero?
     end
   end
 end
