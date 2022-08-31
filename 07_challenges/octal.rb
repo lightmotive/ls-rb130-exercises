@@ -8,6 +8,7 @@
 # Rules:
 # - Invalid strings should return 0, including anything with letters
 # - Leading 0s are allowed and should be truncated.
+# - Allowed digits: 0-7
 
 # * Examples *
 # - See test/octal_test.rb.
@@ -18,7 +19,7 @@
 
 # * Algorithm *
 # Given an `octal_string` input:
-# - Validate string: `return 0 if octal_string.count(^0-9) > 0`--use helper).
+# - Validate string: `return 0 if octal_string.count(^0-7) > 0`--use helper).
 # - Drop leading zeros.
 # - Reverse string, then enumerate through remaining chars with index.
 #   - Convert the char to an integer.
@@ -32,3 +33,28 @@
 # 1 * 8^1 = 8
 # 7 + 8 = 15
 # Valid!
+
+class Octal
+  attr_reader :value_string
+
+  def initialize(octal_string)
+    @value_string = octal_string.gsub(/^0+/, '')
+  end
+
+  def to_decimal
+    return 0 unless valid?
+
+    value_string.reverse.each_char.with_index.reduce(0) do |sum, (char, idx)|
+      sum + char.to_i * (8**idx)
+    end
+  end
+
+  private
+
+  def valid?
+    return false if value_string.count('^0-7').positive?
+    return false if value_string.empty?
+
+    true
+  end
+end
