@@ -44,17 +44,14 @@ class Octal
   def to_decimal
     return 0 unless valid?
 
-    value_string.reverse.each_char.with_index.reduce(0) do |sum, (char, idx)|
-      sum + char.to_i * (8**idx)
+    value_string.reverse.each_char.with_index.reduce(0) do |sum, (char, exponent)|
+      sum + char.to_i * (8**exponent)
     end
   end
 
   private
 
   def valid?
-    return false if value_string.count('^0-7').positive?
-    return false if value_string.empty?
-
-    true
+    !value_string.empty? && value_string.count('^0-7').zero?
   end
 end
