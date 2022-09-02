@@ -48,7 +48,9 @@ class BeerSong
   end
 
   def self.verses(first, last)
-    # generate verses from first..last with an empty line between each
+    first.downto(last).map do |number|
+      verse(number)
+    end.join("\n")
   end
 
   def self.lyrics
