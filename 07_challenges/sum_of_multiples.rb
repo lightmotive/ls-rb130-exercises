@@ -6,15 +6,6 @@
 # are less than the first number.
 
 class SumOfMultiples
-  # * Tests/examples *
-  # For instance, if we list all the natural numbers up to, but not including, 20
-  # that are multiples of either 3 or 5, we get 3, 5, 6, 9, 10, 12, 15, and 18.
-  # The sum of these multiples is 78.
-
-  # * Data structures *
-
-  # * Algorithm *
-
   attr_reader :multiples_of_numbers
 
   def initialize(*multiples_of_numbers)
@@ -22,10 +13,16 @@ class SumOfMultiples
   end
 
   def to(max_excluded)
-    multiples_to_sum = (1...max_excluded).select do |n|
-      # Select if `n` is a multiple of any number in `multiples_of_numbers`...
-    end
+    (1...max_excluded).select(&method(:multiple_of_number?)).sum
+  end
 
-    multiples_to_sum.sum
+  def self.to(max_excluded)
+    new.to(max_excluded)
+  end
+
+  private
+
+  def multiple_of_number?(candidate)
+    multiples_of_numbers.any? { |number| (candidate % number).zero? }
   end
 end
