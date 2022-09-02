@@ -13,7 +13,7 @@ class SumOfMultiples
   end
 
   def to(max_excluded)
-    (1...max_excluded).select(&method(:multiple_of_number?)).sum
+    natural_number_multiples(max_excluded).sum
   end
 
   def self.to(max_excluded)
@@ -21,6 +21,10 @@ class SumOfMultiples
   end
 
   private
+
+  def natural_number_multiples(max_excluded)
+    (1...max_excluded).select(&method(:multiple_of_number?))
+  end
 
   def multiple_of_number?(candidate)
     multiples_of_numbers.any? { |number| (candidate % number).zero? }
