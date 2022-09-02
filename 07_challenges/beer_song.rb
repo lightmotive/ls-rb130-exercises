@@ -44,10 +44,16 @@ class BeerSong
   private_constant :Verse
 
   def self.verse(number)
+    raise ArgumentError, 'Arg should be in 0..99.' unless (0..99).cover?(number)
+
     Verse.new(number).to_s
   end
 
   def self.verses(first, last)
+    raise ArgumentError, 'First arg should be greater than the second.' unless last < first
+    raise ArgumentError, 'First arg should be between 99 and 1.' unless (1..99).cover?(first)
+    raise ArgumentError, 'Second arg should be between 98 and 0.' unless (0..98).cover?(last)
+
     first.downto(last).map do |number|
       verse(number)
     end.join("\n")

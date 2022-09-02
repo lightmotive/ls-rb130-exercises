@@ -5,6 +5,15 @@ require './beer_song'
 
 # rubocop:disable Metrics/ClassLength
 class BeerSongTest < Minitest::Test
+  def test_verse_class_is_inaccessible
+    assert_raises(NameError) { BeerSong::Verse }
+  end
+
+  def test_verse_argument_error
+    assert_raises(ArgumentError) { BeerSong.verse(-1) }
+    assert_raises(ArgumentError) { BeerSong.verse(100) }
+  end
+
   def test_the_first_verse
     expected = "99 bottles of beer on the wall, 99 bottles of beer.\n" \
       "Take one down and pass it around, 98 bottles of beer on the wall.\n"
@@ -33,6 +42,13 @@ class BeerSongTest < Minitest::Test
     expected = "No more bottles of beer on the wall, no more bottles of beer.\n" \
       "Go to the store and buy some more, 99 bottles of beer on the wall.\n"
     assert_equal expected, BeerSong.verse(0)
+  end
+
+  def test_verses_argument_errors
+    assert_raises(ArgumentError) { BeerSong.verses(0, 0) }
+    assert_raises(ArgumentError) { BeerSong.verses(100, 98) }
+    assert_raises(ArgumentError) { BeerSong.verses(99, -1) }
+    assert_raises(ArgumentError) { BeerSong.verses(50, 60) }
   end
 
   def test_a_couple_verses
