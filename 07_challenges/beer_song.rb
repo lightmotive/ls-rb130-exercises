@@ -11,34 +11,32 @@ class BeerSong
       # Generate specific verse with this format:
       #   "2 bottles of beer on the wall, 2 bottles of beer.\n" \
       #   "Take one down and pass it around, 1 bottle of beer on the wall.\n"
-      # - Account for plurality:
-      #   "1 bottle of beer on the wall, 1 bottle of beer.\n" \
-      #   "Take it down and pass it around, no more bottles of beer on the wall.\n"
-      # - Account for 0:
-      #   "No more bottles of beer on the wall, no more bottles of beer.\n" \
-      #   "Go to the store and buy some more, 99 bottles of beer on the wall.\n"
-
-      # One can decompose a verse into these components:
-      # - bottles_of_beer: `n` bottle(s) of beer
-      #   - First line template:
-      #     "#{bottles_of_beer} on the wall, #{bottles_of_beer}\n"
-      #   - Second line template:
-      #     - If number.positive?:
-      #       - "Take it down and pass it around, #{bottles_of_beer} on the wall.\n"
-      #     - Else:
-      #       - "Go to the store and buy some more, 99 bottles of beer on the wall.\n"
     end
 
     private
 
     attr_reader :number
 
-    def line1
+    def excerpt_bottles_of_beer(bottle_count)
+      # - Account for plurality:
+      #   "1 bottle of beer on the wall, 1 bottle of beer.\n" \
+      #   "Take it down and pass it around, no more bottles of beer on the wall.\n"
+      # - Account for 0:
+      #   "No more bottles of beer on the wall, no more bottles of beer.\n" \
+      #   "Go to the store and buy some more, 99 bottles of beer on the wall.\n"
       # ...
+      # return `n` bottle(s) of beer
+    end
+
+    def line1
+      # "#{bottles_of_beer(number)} on the wall, #{bottles_of_beer(number)}\n"
     end
 
     def line2
-      # ...
+      # - If number.positive?:
+      #   - "Take it down and pass it around, #{bottles_of_beer(number - 1)} on the wall.\n"
+      # - Else:
+      #   - "Go to the store and buy some more, 99 bottles of beer on the wall.\n"
     end
   end
   private_constant :Verse
