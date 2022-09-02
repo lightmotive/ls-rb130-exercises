@@ -54,6 +54,6 @@ class BeerSong
   end
 
   def self.lyrics
-    # Generate all verses, `verses(99, 0)` with an empty line between each.
+    verses(99, 0)
   end
 end
