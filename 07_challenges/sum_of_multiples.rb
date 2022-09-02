@@ -6,10 +6,10 @@
 # are less than the first number.
 
 class SumOfMultiples
-  attr_reader :multiples_of_numbers
+  attr_reader :multiple_factors
 
-  def initialize(*multiples_of_numbers)
-    @multiples_of_numbers = multiples_of_numbers.empty? ? [3, 5] : multiples_of_numbers
+  def initialize(*multiple_factors)
+    @multiple_factors = multiple_factors.empty? ? [3, 5] : multiple_factors
   end
 
   def to(max_excluded)
@@ -23,10 +23,10 @@ class SumOfMultiples
   private
 
   def natural_number_multiples(max_excluded)
-    (1...max_excluded).select(&method(:multiple_of_number?))
+    (1...max_excluded).select(&method(:multiple?))
   end
 
-  def multiple_of_number?(candidate)
-    multiples_of_numbers.any? { |number| (candidate % number).zero? }
+  def multiple?(number)
+    multiple_factors.any? { |factor| (number % factor).zero? }
   end
 end
