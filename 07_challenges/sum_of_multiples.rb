@@ -3,8 +3,7 @@
 # * Understand *
 # Write a program that, given a natural number and a set of 1 or more other
 # numbers, can find the sum of all the multiples of the numbers in the set that
-# are less than the first number. If the set of numbers is not given,
-# use a default set of 3 and 5.
+# are less than the first number.
 
 class SumOfMultiples
   # * Tests/examples *
@@ -23,7 +22,10 @@ class SumOfMultiples
   end
 
   def to(max_excluded)
-    # Find the sum of all multiples of `multiples_of_numbers` up to, but excluding, `max_excluded`:
-    # Algorithm...
+    multiples_to_sum = (1...max_excluded).select do |n|
+      # Select if `n` is a multiple of any number in `multiples_of_numbers`...
+    end
+
+    multiples_to_sum.sum
   end
 end
