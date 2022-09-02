@@ -54,9 +54,8 @@ class BeerSong
     raise ArgumentError, 'First arg should be between 99 and 1.' unless (1..99).cover?(first)
     raise ArgumentError, 'Second arg should be between 98 and 0.' unless (0..98).cover?(last)
 
-    first.downto(last).map do |number|
-      verse(number)
-    end.join("\n")
+    verses = first.downto(last).map { |number| verse(number) }
+    verses.join("\n")
   end
 
   def self.lyrics
