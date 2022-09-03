@@ -1,8 +1,7 @@
 # frozen_string_literal: true
 
-class BeerSong
-  # Private class that encapsulates "verse" attributes and behaviors/templates.
-  # ToDo: Internationalize strings in this class.
+module BeerSong
+  # TODO: Internationalize strings in this class.
   class Verse
     def initialize(number)
       @number = number
@@ -50,8 +49,6 @@ class BeerSong
       VERSE
     end
   end
-
-  private_constant :Verse
 
   def self.verse(number)
     raise ArgumentError, 'Arg should be in 0..99.' unless (0..99).cover?(number)

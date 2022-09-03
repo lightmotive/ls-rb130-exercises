@@ -5,10 +5,6 @@ require './beer_song'
 
 # rubocop:disable Metrics/ClassLength
 class BeerSongTest < Minitest::Test
-  def test_verse_class_is_inaccessible
-    assert_raises(NameError) { BeerSong::Verse }
-  end
-
   def test_the_first_verse
     expected = "99 bottles of beer on the wall, 99 bottles of beer.\n" \
       "Take one down and pass it around, 98 bottles of beer on the wall.\n"
