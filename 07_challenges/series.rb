@@ -10,10 +10,14 @@ class Series
   def slices(length)
     raise ArgumentError, 'Slice length must be <= integer string length.' if length > integers.length
 
-    # Algorithm:
-    # - Iterate through the string slices of specified length, incrementing
-    #   the starting position with each iteration. Iterate from
-    #   0..(integers.length - length), taking length of chars from string.
-    #   - Map chars to_i.
+    0.upto(integers.length - length).reduce([]) do |result, start|
+      result << slice_integers(start, length)
+    end
+  end
+
+  private
+
+  def slice_integers(start, length)
+    integers[start, length].chars.map(&:to_i)
   end
 end
