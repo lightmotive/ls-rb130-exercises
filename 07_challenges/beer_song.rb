@@ -9,35 +9,45 @@ class BeerSong
     end
 
     def to_s
-      <<~VERSE
-        #{line1}
-        #{line2}
-      VERSE
+      return default_verse if number > 2
+
+      case number
+      when 2 then two_bottle_verse
+      when 1 then one_bottle_verse
+      when 0 then zero_bottle_verse
+      end
     end
 
     private
 
     attr_reader :number
 
-    def excerpt_bottles(bottle_count, is_sentence_start: false)
-      no_more = is_sentence_start ? 'No more' : 'no more'
-      quantity = bottle_count.zero? ? no_more : bottle_count.to_s
-      bottles_string = bottle_count == 1 ? 'bottle' : 'bottles'
-      "#{quantity} #{bottles_string} of beer"
+    def default_verse
+      <<~VERSE
+        #{number} bottles of beer on the wall, #{number} bottles of beer.
+        Take one down and pass it around, #{number - 1} bottles of beer on the wall.
+      VERSE
     end
 
-    def excerpt_take_down
-      "Take #{number == 1 ? 'it' : 'one'} down"
+    def two_bottle_verse
+      <<~VERSE
+        2 bottles of beer on the wall, 2 bottles of beer.
+        Take one down and pass it around, 1 bottle of beer on the wall.
+      VERSE
     end
 
-    def line1
-      "#{excerpt_bottles(number, is_sentence_start: true)} on the wall, #{excerpt_bottles(number)}."
+    def one_bottle_verse
+      <<~VERSE
+        1 bottle of beer on the wall, 1 bottle of beer.
+        Take it down and pass it around, no more bottles of beer on the wall.
+      VERSE
     end
 
-    def line2
-      return "#{excerpt_take_down} and pass it around, #{excerpt_bottles(number - 1)} on the wall." if number.positive?
-
-      "Go to the store and buy some more, #{excerpt_bottles(99)} on the wall."
+    def zero_bottle_verse
+      <<~VERSE
+        No more bottles of beer on the wall, no more bottles of beer.
+        Go to the store and buy some more, 99 bottles of beer on the wall.
+      VERSE
     end
   end
 
@@ -49,12 +59,8 @@ class BeerSong
     Verse.new(number).to_s
   end
 
-  def self.verses(first, last)
-    raise ArgumentError, 'First arg should be greater than the second.' unless last < first
-    raise ArgumentError, 'First arg should be between 99 and 1.' unless (1..99).cover?(first)
-    raise ArgumentError, 'Second arg should be between 98 and 0.' unless (0..98).cover?(last)
-
-    verses = first.downto(last).map { |number| verse(number) }
+  def self.verses(start, stop)
+    verses = start.downto(stop).map { |number| verse(number) }
     verses.join("\n")
   end
 
