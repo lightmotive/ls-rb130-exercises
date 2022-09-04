@@ -20,6 +20,13 @@ class Diamond
 
   private
 
+  def end_letter_with_validation(input)
+    raise ArgumentError, "Specify a single char at or after #{START_CHAR}" if input.length > 1
+    raise ArgumentError, "Char must be '#{START_CHAR}' or after on the ASCII table." if input.ord < START_CHAR.ord
+
+    input
+  end
+
   def as_lines
     top = lines_top
     bottom = lines_bottom(top)
@@ -46,12 +53,5 @@ class Diamond
   def lines_all_centered(top, bottom)
     line_length_max = top.last.length
     (top + bottom).map { |line| line.center(line_length_max) }
-  end
-
-  def end_letter_with_validation(input)
-    raise ArgumentError, "Specify a single char at or after #{START_CHAR}" if input.length > 1
-    raise ArgumentError, "Char must be '#{START_CHAR}' or after on the ASCII table." if input.ord < START_CHAR.ord
-
-    input
   end
 end
