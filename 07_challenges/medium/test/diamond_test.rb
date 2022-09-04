@@ -10,13 +10,11 @@ class DiamondTest < Minitest::Test
   end
 
   def test_letter_b
-    skip
     answer = Diamond.make_diamond('B')
     assert_equal " A \nB B\n A \n", answer
   end
 
   def test_letter_c
-    skip
     answer = Diamond.make_diamond('C')
     string = "  A  \n"\
              " B B \n"\
@@ -27,7 +25,6 @@ class DiamondTest < Minitest::Test
   end
 
   def test_letter_e
-    skip
     answer = Diamond.make_diamond('E')
     string = "    A    \n"\
              "   B B   \n"\

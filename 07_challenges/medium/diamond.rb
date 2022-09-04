@@ -1,8 +1,5 @@
 # frozen_string_literal: true
 
-# * Understand *
-# - Within basic class structure below.
-
 class Diamond
   START_LETTER = 'A'
 
@@ -12,54 +9,36 @@ class Diamond
     @end_letter = end_letter_with_validation(end_letter)
   end
 
-  def as_string
-    as_lines.join("\n")
-  end
-
   def self.make_diamond(end_letter)
     new(end_letter).as_string
+  end
+
+  def as_string
+    "#{as_lines.join("\n")}\n"
   end
 
   private
 
   def as_lines
-    lines_top = []
+    lines_top = [START_LETTER]
+    return lines_top if end_letter == START_LETTER
 
-    # * Algorithm *
-    letters = START_LETTER..end_letter
+    remaining_letters = ((START_LETTER.ord + 1).chr..end_letter).to_a
+    space_between_letters = 1
+    lines_top += remaining_letters.each_with_object([]) do |letter, lines|
+      lines << "#{letter}#{' ' * space_between_letters}#{letter}"
+      space_between_letters += 2
+    end
 
-    # - Determine diamond width: size of letters from A..end_letter
-    # - Line components:
-    #   - Letter(s)
-    #   - Space between letters (start at 0 and increase with each line)
-    #   - Total width of each line.
-    # - With that information, one can simply center the letter or letters with
-    #   spaces between them on a blank line that's as wide as the diamond.
-    #   - That will generate the top half of the diamond, including the middle.
-    # - To generate the bottom half: append a reversed the top half of lines,
-    #   excluding the middle.
-
-    # Output: diamond starting with A, expanding through end_letter, then
-    # half above middle reversed.
+    line_length = space_between_letters
     lines_bottom = lines_top[0..-2].reverse
-    lines_top + lines_bottom
+    (lines_top + lines_bottom).map { |line| line.center(line_length) }
   end
 
   def end_letter_with_validation(input)
-    raise ArgumentError, "Specify a single uppercase letter after #{START_LETTER}" if input.length > 1
+    raise ArgumentError, "Specify a single char at or after #{START_LETTER}" if input.length > 1
+    raise ArgumentError, "Char must be '#{START_LETTER}' or after on the ASCII table." if input.ord < START_LETTER.ord
 
-    input_validated = input.upcase
-    if input_validated.ord < START_LETTER.ord
-      raise ArgumentError, "Letter must be '#{START_LETTER}' or after on the ASCII char table."
-    end
-
-    input_validated
-  end
-
-  def line(letter, line_length, space_between_letters = nil)
-    return letter.center(line_length) if space_between_letters.nil?
-
-    letters = "#{letter}#{' ' * space_between_letters}#{letter}"
-    letters.center(line_length)
+    input
   end
 end
