@@ -14,8 +14,7 @@ class Diamond
   end
 
   def as_string
-    lines = end_letter == START_CHAR ? [START_CHAR] : as_lines
-    "#{lines.join("\n")}\n"
+    "#{as_lines.join("\n")}\n"
   end
 
   private
@@ -35,6 +34,7 @@ class Diamond
 
   def lines_top
     lines = [START_CHAR]
+    return lines if end_letter == START_CHAR
 
     remaining_letters = ((START_CHAR.ord + 1).chr..end_letter).to_a
     space_between_letters = -1
