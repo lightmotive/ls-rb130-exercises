@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class Diamond
-  START_LETTER = 'A'
+  START_CHAR = 'A'
 
   attr_reader :end_letter
 
@@ -14,30 +14,43 @@ class Diamond
   end
 
   def as_string
-    "#{as_lines.join("\n")}\n"
+    lines = end_letter == START_CHAR ? [START_CHAR] : as_lines
+    "#{lines.join("\n")}\n"
   end
 
   private
 
   def as_lines
-    lines_top = [START_LETTER]
-    return lines_top if end_letter == START_LETTER
+    top = lines_top
+    bottom = lines_bottom(top)
+    lines_all_centered(top, bottom)
+  end
 
-    remaining_letters = ((START_LETTER.ord + 1).chr..end_letter).to_a
-    space_between_letters = 1
-    lines_top += remaining_letters.each_with_object([]) do |letter, lines|
-      lines << "#{letter}#{' ' * space_between_letters}#{letter}"
+  def lines_top
+    lines = [START_CHAR]
+
+    remaining_letters = ((START_CHAR.ord + 1).chr..end_letter).to_a
+    space_between_letters = -1
+    remaining_letters.each do |letter|
       space_between_letters += 2
+      lines << "#{letter}#{' ' * space_between_letters}#{letter}"
     end
 
-    line_length = space_between_letters
-    lines_bottom = lines_top[0..-2].reverse
-    (lines_top + lines_bottom).map { |line| line.center(line_length) }
+    lines
+  end
+
+  def lines_bottom(top)
+    top[0..-2].reverse
+  end
+
+  def lines_all_centered(top, bottom)
+    line_length_max = top.last.length
+    (top + bottom).map { |line| line.center(line_length_max) }
   end
 
   def end_letter_with_validation(input)
-    raise ArgumentError, "Specify a single char at or after #{START_LETTER}" if input.length > 1
-    raise ArgumentError, "Char must be '#{START_LETTER}' or after on the ASCII table." if input.ord < START_LETTER.ord
+    raise ArgumentError, "Specify a single char at or after #{START_CHAR}" if input.length > 1
+    raise ArgumentError, "Char must be '#{START_CHAR}' or after on the ASCII table." if input.ord < START_CHAR.ord
 
     input
   end
