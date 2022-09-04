@@ -74,7 +74,7 @@ end
 #   end
 # end
 
-# require_relative '../../ruby-common/benchmark_report'
+# require_relative '../../../ruby-common/benchmark_report'
 
 # TESTS = [{ input: [2, 2, 2], expected_output: 'equilateral' },
 #          { input: [10, 10, 10], expected_output: 'equilateral' },
