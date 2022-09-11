@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 def url?(string)
-  string.match?(%r{^https?://\S+$})
+  string.match?(%r{\Ahttps?://\S+\z})
 end
 
 puts url?('http://launchschool.com') == true
