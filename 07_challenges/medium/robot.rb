@@ -22,15 +22,25 @@
 # - Class const: NAME_LETTERS = ('A'..'Z').to_a.freeze
 # - Generate random letters using NAME_LETTERS[rand(26)].
 
-# Generate guaranteed unique values using a provided Generator class that
-# defines a `generate` method.
-# Automatically save generated values. Invoke `Generator.generate` until value
-# is not included in used values.
+# Generate guaranteed unique values using any provided class that defines
+# a `generate` method. This class is useful when `generate` does return unique
+# values, such as randomly generated values.
+#
+# Public behaviors:
+# - `::new(generator)`: `generator` must be a class or module that defines
+#   a `generate` method that returns different, usually random, values.
+# - `#create`: invoke `generator.generate` until returned value is not found
+#   among previously created and returned values. It then saves the unique
+#   value to ensure it isn't returned again, then returns it.
 class Unique
   def initialize(generator)
     @generator = generator
-    # A real-world class would include a database or other persistent storage to
-    # load and save generated names by unique key.
+    # A real-world class would use a database or other persistent storage
+    # that loads and saves generated values. E.g., one could override the
+    # `used_values`, `unique?`, and `save` methods to polymorphically use this
+    # class with an external data source.
+    #
+    # For this exercise, we'll simply use an array:
     @used_values = []
   end
 
@@ -56,7 +66,11 @@ class Unique
   end
 end
 
-# Generate Robot name. Provide to `Unique` class as a generator.
+# Generate Robot name. Provide to `Unique` class as the collaborator for value
+# generation.
+#
+# Public behaviors:
+# - `::generate`: generate a random string that matches /\A[A-Z]{2}\d{3}\z/
 class RobotNameGenerator
   def self.generate
     name = String.new
@@ -81,8 +95,12 @@ class RobotNameGenerator
   end
 end
 
-# Robot with a randomly generated and guaranteed-unique name.
-# `#reset` generates and assigns a new unique name.
+# Robot with a randomly generated and guaranteed-unique name with
+# reset capability.
+#
+# Public behaviors:
+# - `#name`: return current `@name` attribute.
+# - `#reset`: generates a new unique name and assigns it to `@name`.
 class Robot
   @@unique = Unique.new(RobotNameGenerator)
   attr_reader :name
