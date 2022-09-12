@@ -22,19 +22,20 @@
 # - Class const: NAME_LETTERS = ('A'..'Z').to_a.freeze
 # - Generate random letters using NAME_LETTERS[rand(26)].
 
-# Generate guaranteed unique values using any provided class that defines
-# a `generate` method. This class is useful when `generate` does return unique
-# values, such as randomly generated values.
+# Guarantee uniqueness of any block-provided value. Particularly useful for
+# randomly generated values.
 #
 # Public behaviors:
-# - `::new(generator)`: `generator` must be a class or module that defines
-#   a `generate` method that returns different, usually random, values.
-# - `#create`: invoke `generator.generate` until returned value is not found
-#   among previously created and returned values. It then saves the unique
-#   value to ensure it isn't returned again, then returns it.
+# - `::new { any_generated_value }`: block should return a value.
+# - `#create`: use the init-provided block to get values until the
+#   returned value is not found among previously returned values.
+#   It saves the unique value to ensure it isn't returned again, then
+#   returns it.
 class Unique
-  def initialize(generator)
-    @generator = generator
+  def initialize(&generate_value)
+    raise ArgumentError, 'Include block with ::new.' unless block_given?
+
+    @generate_value = generate_value
     # A real-world class would use a database or other persistent storage
     # that loads and saves generated values. E.g., one could override the
     # `used_values`, `unique?`, and `save` methods to polymorphically use this
@@ -45,7 +46,7 @@ class Unique
   end
 
   def create
-    value = generator.generate until unique?(value)
+    value = generate_value.call until unique?(value)
 
     save(value)
     value
@@ -53,7 +54,7 @@ class Unique
 
   private
 
-  attr_reader :generator, :used_values
+  attr_reader :generate_value, :used_values
 
   def unique?(value)
     return false if value.nil?
@@ -66,12 +67,11 @@ class Unique
   end
 end
 
-# Generate Robot name. Provide to `Unique` class as the collaborator for value
-# generation.
+# Generate Robot name that matches /\A[A-Z]{2}\d{3}\z/.
 #
 # Public behaviors:
-# - `::generate`: generate a random string that matches /\A[A-Z]{2}\d{3}\z/
-class RobotNameGenerator
+# - `::generate`: generate and return the random name.
+class RobotName
   def self.generate
     name = String.new
     2.times { name << random_letter }
@@ -96,13 +96,14 @@ class RobotNameGenerator
 end
 
 # Robot with a randomly generated and guaranteed-unique name with
-# reset capability.
+# reset capability. Uses `Unique` to ensure uniqueness of
+# `RobotName`-generated names.
 #
 # Public behaviors:
-# - `#name`: return current `@name` attribute.
-# - `#reset`: generates a new unique name and assigns it to `@name`.
+# - `#name`: return current `@name` value.
+# - `#reset`: generate a new unique name and assign it to `@name`.
 class Robot
-  @@unique = Unique.new(RobotNameGenerator)
+  @@unique = Unique.new { RobotName.generate }
   attr_reader :name
 
   def initialize
