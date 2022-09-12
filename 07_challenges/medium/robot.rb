@@ -22,49 +22,6 @@
 # - Class const: NAME_LETTERS = ('A'..'Z').to_a.freeze
 # - Generate random letters using NAME_LETTERS[rand(26)].
 
-class RobotName
-  @@generated_names = []
-  # A real factory would want to use a DB to check + store generated names.
-
-  class << self
-    NAME_LETTERS = ('A'..'Z').to_a.freeze
-
-    def random
-      name = generate_random until unique?(name)
-
-      save(name)
-      name
-    end
-
-    private
-
-    def generate_random
-      letters = 2.times.reduce(String.new) { |acc, _| acc << random_letter }
-      numbers = 3.times.reduce(String.new) { |acc, _| acc << random_digit.to_s }
-
-      "#{letters}#{numbers}"
-    end
-
-    def unique?(name)
-      return false if name.nil?
-
-      !@@generated_names.include?(name)
-    end
-
-    def save(name)
-      @@generated_names << name
-    end
-
-    def random_digit
-      rand(10)
-    end
-
-    def random_letter
-      NAME_LETTERS[rand(26)]
-    end
-  end
-end
-
 class Robot
   attr_reader :name
 
@@ -73,6 +30,58 @@ class Robot
   end
 
   def reset
-    @name = RobotName.random
+    @name = Robot.unique_random_name
+  end
+
+  class << self
+    def unique_random_name
+      UniqueName.random
+    end
+
+    # One could abstract this class with customization options.
+    # That's out of scope for now.
+    class UniqueName
+      NAME_LETTERS = ('A'..'Z').to_a.freeze
+      DIGIT_MAX = 9 # min always 0
+
+      # A real factory would want to use a DB to check + store generated names:
+      @@generated_names = []
+
+      class << self
+        def random
+          name = generate until unique?(name)
+
+          save(name)
+          name
+        end
+
+        private
+
+        def generate
+          letters = 2.times.reduce(String.new) { |acc, _| acc << random_letter }
+          numbers = 3.times.reduce(String.new) { |acc, _| acc << random_digit.to_s }
+
+          "#{letters}#{numbers}"
+        end
+
+        def unique?(name)
+          return false if name.nil?
+
+          !@@generated_names.include?(name)
+        end
+
+        def save(name)
+          @@generated_names << name
+        end
+
+        def random_digit
+          rand(DIGIT_MAX + 1)
+        end
+
+        def random_letter
+          NAME_LETTERS[rand(NAME_LETTERS.size)]
+        end
+      end
+    end
   end
 end
