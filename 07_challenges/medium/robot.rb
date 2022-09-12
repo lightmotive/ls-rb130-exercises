@@ -23,32 +23,51 @@
 # - Generate random letters using NAME_LETTERS[rand(26)].
 
 class Robot
-  NAME_LETTERS = ('A'..'Z').to_a.freeze
-  @@generated_names = [].freeze
-
   def initialize
-    # - Assign `@name` to `self.class.random_name`
+    # - Assign `@name` to `UniqueName.random`
   end
 
   def reset
-    # - Assign a new random name.
-  end
-
-  private
-
-  def random_digit
-    # - Generate random digits using rand(10).
-  end
-
-  def random_letter
-    # - Generate random letters using NAME_LETTERS[rand(26)].
+    # - Assign `@name` to `UniqueName.random`
   end
 
   class << self
-    def self.random_name
-      # - Generate name randomly using a format /^[A-Z]{2}\d{3}$/
-      # - Ensure it wasn't generated before (track across all instances)
-      # - save generated name in array for to prevent duplicates
+    class UniqueName
+      NAME_LETTERS = ('A'..'Z').to_a.freeze
+      @@generated_names = [].freeze
+      # A real factory would want to use a DB to check + store generated names.
+
+      class << self
+        def random
+          name = String.new
+
+          while name.empty? || unique?(name)
+            name = '' # - Generate name randomly using a format /^[A-Z]{2}\d{3}$/
+          end
+
+          # - save generated name in array for to prevent duplicates
+
+          name
+        end
+
+        private
+
+        def unique?(name)
+          # Verify whether name is unique
+        end
+
+        def random_digit
+          # - Generate random digits using rand(10).
+          1
+        end
+
+        def random_letter
+          # - Generate random letters using NAME_LETTERS[rand(26)].
+          1
+        end
+      end
     end
+
+    def self.random_name; end
   end
 end
