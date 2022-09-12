@@ -59,24 +59,24 @@ end
 # Generate Robot name. Provide to `Unique` class as a generator.
 class RobotNameGenerator
   def self.generate
-    letters = 2.times.reduce(String.new) { |acc, _| acc << random_letter }
-    numbers = 3.times.reduce(String.new) { |acc, _| acc << random_digit.to_s }
-
-    "#{letters}#{numbers}"
+    name = String.new
+    2.times { name << random_letter }
+    3.times { name << random_digit.to_s }
+    name
   end
 
   class << self
-    NAME_LETTERS = ('A'..'Z').to_a.freeze
-    DIGIT_MAX = 9 # min always 0
+    LETTER_ORDINAL_RANGE = 65..90
+    DIGIT_RANGE = 0..9
 
     private
 
     def random_digit
-      rand(DIGIT_MAX + 1)
+      rand(DIGIT_RANGE)
     end
 
     def random_letter
-      NAME_LETTERS[rand(NAME_LETTERS.size)]
+      rand(LETTER_ORDINAL_RANGE).chr
     end
   end
 end
