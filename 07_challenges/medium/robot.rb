@@ -22,52 +22,57 @@
 # - Class const: NAME_LETTERS = ('A'..'Z').to_a.freeze
 # - Generate random letters using NAME_LETTERS[rand(26)].
 
+class RobotName
+  @@generated_names = []
+  # A real factory would want to use a DB to check + store generated names.
+
+  class << self
+    NAME_LETTERS = ('A'..'Z').to_a.freeze
+
+    def random
+      name = generate_random until unique?(name)
+
+      save(name)
+      name
+    end
+
+    private
+
+    def generate_random
+      letters = 2.times.reduce(String.new) { |acc, _| acc << random_letter }
+      numbers = 3.times.reduce(String.new) { |acc, _| acc << random_digit.to_s }
+
+      "#{letters}#{numbers}"
+    end
+
+    def unique?(name)
+      return false if name.nil?
+
+      !@@generated_names.include?(name)
+    end
+
+    def save(name)
+      @@generated_names << name
+    end
+
+    def random_digit
+      rand(10)
+    end
+
+    def random_letter
+      NAME_LETTERS[rand(26)]
+    end
+  end
+end
+
 class Robot
+  attr_reader :name
+
   def initialize
-    # - Assign `@name` to `UniqueName.random`
+    reset
   end
 
   def reset
-    # - Assign `@name` to `UniqueName.random`
-  end
-
-  class << self
-    class UniqueName
-      NAME_LETTERS = ('A'..'Z').to_a.freeze
-      @@generated_names = [].freeze
-      # A real factory would want to use a DB to check + store generated names.
-
-      class << self
-        def random
-          name = String.new
-
-          while name.empty? || unique?(name)
-            name = '' # - Generate name randomly using a format /^[A-Z]{2}\d{3}$/
-          end
-
-          # - save generated name in array for to prevent duplicates
-
-          name
-        end
-
-        private
-
-        def unique?(name)
-          # Verify whether name is unique
-        end
-
-        def random_digit
-          # - Generate random digits using rand(10).
-          1
-        end
-
-        def random_letter
-          # - Generate random letters using NAME_LETTERS[rand(26)].
-          1
-        end
-      end
-    end
-
-    def self.random_name; end
+    @name = RobotName.random
   end
 end
