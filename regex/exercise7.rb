@@ -2,16 +2,11 @@
 
 def format_date(string)
   regex = %r{
-  \A
-    (\d{4}) # \1: year
-    ([/-])  # \2: delimiter
-    (\d{2}) # \3: month
-    \2      # delimiter
-    (\d{2}) # \4: day
-  \z
-  }x
-
-  string.gsub(regex, '\4.\3.\1')
+    \A
+      (?<year>\d{4})(?<delim>[/-])(?<month>\d{2})\k<delim>(?<day>\d{2})
+    \z
+    }x
+  string.gsub(regex, '\k<day>.\k<month>.\k<year>')
 end
 
 p format_date('2016-06-17') == '17.06.2016'
