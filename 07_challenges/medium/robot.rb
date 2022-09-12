@@ -22,6 +22,37 @@
 # - Class const: NAME_LETTERS = ('A'..'Z').to_a.freeze
 # - Generate random letters using NAME_LETTERS[rand(26)].
 
+# ** Detailed Explanation **
+#
+# Classes group, or represent a specific relationship between, attributes and methods. Here are the details:
+#
+# 1. `Unique`: Guarantee uniqueness of any block-provided value.
+#   - Particularly useful for randomly generated values.
+#   - `initialize` accepts any block that is expected to generate a value
+#     (usually random); the block is converted to a Proc and saved to an
+#     instance variable to serve as a collaborator.
+#   - Abstracting this responsibility to this class enables reusing `Unique`
+#     to ensure any type of generated value (whatever a block returns) is
+#     unique in any program. There's probably at least one Gem that provides
+#     a more advanced and configurable version of this.
+# 2. `RobotName`: Statelessly generate a random robot name that matches
+#     `/\A[A-Z]{2}\d{3}\z/`.
+#   - Not guaranteed to be unique, hence the need for the `Unique` class.
+#   - Abstracting this responsibility to this class makes it easier to read,
+#     understand, and, perhaps in the future, modify or entirely replace the
+#     class to generate robot names with different logic.
+# 3. `Robot`: Statefully provide a `name` value and a `reset` behavior.
+#   - Initializes a `Unique` class instance with a block that returns
+#     `RobotName.generate`; assigns that instance to a class variable to act as
+#     a class-level collaborator (`@@unique = Unique.new { RobotName.generate }).
+#   - `#reset` generates and assigns a new unique name using `@@unique.create`.
+#   - Thanks to the abstractions above, this class is simple and easy to maintain.
+#     We can replace the `Unique` class or what the block provides to `Unique` to
+#     change important behaviors without wading through a single class that does
+#     three different things.
+
+# ** Implementation **
+
 # Guarantee uniqueness of any block-provided value. Particularly useful for
 # randomly generated values.
 #
