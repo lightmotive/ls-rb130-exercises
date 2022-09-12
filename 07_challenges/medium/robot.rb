@@ -22,7 +22,69 @@
 # - Class const: NAME_LETTERS = ('A'..'Z').to_a.freeze
 # - Generate random letters using NAME_LETTERS[rand(26)].
 
+# Generate guaranteed unique values using a provided Generator class that
+# defines a `generate` method.
+# Automatically save generated values. Invoke `Generator.generate` until value
+# is not included in used values.
+class Unique
+  def initialize(generator)
+    @generator = generator
+    # A real-world class would include a database or other persistent storage to
+    # load and save generated names by unique key.
+    @used_values = []
+  end
+
+  def create
+    value = generator.generate until unique?(value)
+
+    save(value)
+    value
+  end
+
+  private
+
+  attr_reader :generator, :used_values
+
+  def unique?(value)
+    return false if value.nil?
+
+    !used_values.include?(value)
+  end
+
+  def save(value)
+    used_values << value
+  end
+end
+
+# Generate Robot name. Provide to `Unique` class as a generator.
+class RobotNameGenerator
+  def self.generate
+    letters = 2.times.reduce(String.new) { |acc, _| acc << random_letter }
+    numbers = 3.times.reduce(String.new) { |acc, _| acc << random_digit.to_s }
+
+    "#{letters}#{numbers}"
+  end
+
+  class << self
+    NAME_LETTERS = ('A'..'Z').to_a.freeze
+    DIGIT_MAX = 9 # min always 0
+
+    private
+
+    def random_digit
+      rand(DIGIT_MAX + 1)
+    end
+
+    def random_letter
+      NAME_LETTERS[rand(NAME_LETTERS.size)]
+    end
+  end
+end
+
+# Robot with a randomly generated and guaranteed-unique name.
+# `#reset` generates and assigns a new unique name.
 class Robot
+  @@unique = Unique.new(RobotNameGenerator)
   attr_reader :name
 
   def initialize
@@ -30,58 +92,6 @@ class Robot
   end
 
   def reset
-    @name = Robot.unique_random_name
-  end
-
-  class << self
-    def unique_random_name
-      UniqueName.random
-    end
-
-    # One could abstract this class with customization options.
-    # That's out of scope for now.
-    class UniqueName
-      NAME_LETTERS = ('A'..'Z').to_a.freeze
-      DIGIT_MAX = 9 # min always 0
-
-      # A real factory would want to use a DB to check + store generated names:
-      @@generated_names = []
-
-      class << self
-        def random
-          name = generate until unique?(name)
-
-          save(name)
-          name
-        end
-
-        private
-
-        def generate
-          letters = 2.times.reduce(String.new) { |acc, _| acc << random_letter }
-          numbers = 3.times.reduce(String.new) { |acc, _| acc << random_digit.to_s }
-
-          "#{letters}#{numbers}"
-        end
-
-        def unique?(name)
-          return false if name.nil?
-
-          !@@generated_names.include?(name)
-        end
-
-        def save(name)
-          @@generated_names << name
-        end
-
-        def random_digit
-          rand(DIGIT_MAX + 1)
-        end
-
-        def random_letter
-          NAME_LETTERS[rand(NAME_LETTERS.size)]
-        end
-      end
-    end
+    @name = @@unique.create
   end
 end
