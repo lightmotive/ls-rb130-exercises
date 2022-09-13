@@ -20,6 +20,7 @@
 
 # * Data structure *
 # - Store minutes using private instance attribute.
+# - #+ and #- should return a new Clock instance.
 
 # * Algorithm *
 # MINUTES_PER_DAY = 24 * 60
@@ -37,36 +38,42 @@
 # Key helper methods:
 # - total_minutes=(value)
 #   - @total_minutes = value mod (MINUTES_PER_DAY).
-# - breakdown
+# - minutes_breakdown
 #   - Calculate { hours: ..., minutes: ... } from total_minutes.
+
+require 'pry'
 
 class Clock
   HOURS_PER_DAY = 24
   MINUTES_PER_HOUR = 60
   MINUTES_PER_DAY = HOURS_PER_DAY * MINUTES_PER_HOUR
 
-  def initialize(hours = 0, minutes = 0)
-    #   - Calculate total minutes from hours and minutes (helper method).
+  def initialize(hours, minutes)
+    apply_values(hours, minutes)
   end
 
-  def at(hours = 0, minutes = 0)
-    #   - Self-instantiate.
+  def self.at(hours = 0, minutes = 0)
+    new(hours, minutes)
   end
 
-  def +(other)
-    self.total_minutes += other
+  # rubocop:disable Naming/BinaryOperatorParameterName
+  def +(minutes)
+    breakdown = minutes_breakdown(total_minutes + minutes)
+    self.class.new(breakdown[:hours], breakdown[:minutes])
   end
 
-  def -(other)
-    self.+(-other)
+  def -(minutes)
+    self + -minutes
   end
+  # rubocop:enable Naming/BinaryOperatorParameterName
 
   def ==(other)
-    #   - Compare total_minutes attrs.
+    total_minutes == other.total_minutes
   end
 
   def to_s
-    #   - format as "hh:mm"
+    breakdown = minutes_breakdown
+    "#{format_number(breakdown[:hours])}:#{format_number(breakdown[:minutes])}"
   end
 
   protected
@@ -75,11 +82,22 @@ class Clock
 
   private
 
-  def total_minutes=(value)
-    #   - @total_minutes = value mod (MINUTES_PER_DAY).
+  def apply_values(hours, minutes)
+    self.total_minutes = (hours * MINUTES_PER_HOUR) + minutes
   end
 
-  def breakdown
-    #   - Calculate { hours: ..., minutes: ... } from total_minutes.
+  def total_minutes=(value)
+    @total_minutes = value % MINUTES_PER_DAY
+  end
+
+  def minutes_breakdown(total_minutes = nil)
+    total_minutes ||= self.total_minutes
+    hours = total_minutes / MINUTES_PER_HOUR
+    minutes = total_minutes - (hours * MINUTES_PER_HOUR)
+    { hours: hours, minutes: minutes }
+  end
+
+  def format_number(number)
+    number.to_s.rjust(2, '0')
   end
 end
