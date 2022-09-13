@@ -38,28 +38,31 @@
 # Key helper methods:
 # - total_minutes=(value)
 #   - @total_minutes = value mod (MINUTES_PER_DAY).
-# - minutes_breakdown
+# - components
 #   - Calculate { hours: ..., minutes: ... } from total_minutes.
-
-require 'pry'
 
 class Clock
   HOURS_PER_DAY = 24
   MINUTES_PER_HOUR = 60
   MINUTES_PER_DAY = HOURS_PER_DAY * MINUTES_PER_HOUR
 
-  def initialize(hours, minutes)
-    apply_values(hours, minutes)
+  def initialize(minutes = 0)
+    self.total_minutes = minutes
   end
 
   def self.at(hours = 0, minutes = 0)
-    new(hours, minutes)
+    new(components_to_minutes(hours, minutes))
+  end
+
+  class << self
+    def components_to_minutes(hours, minutes)
+      (hours * MINUTES_PER_HOUR) + minutes
+    end
   end
 
   # rubocop:disable Naming/BinaryOperatorParameterName
   def +(minutes)
-    breakdown = minutes_breakdown(total_minutes + minutes)
-    self.class.new(breakdown[:hours], breakdown[:minutes])
+    self.class.new(total_minutes + minutes)
   end
 
   def -(minutes)
@@ -72,8 +75,10 @@ class Clock
   end
 
   def to_s
-    breakdown = minutes_breakdown
-    "#{format_number(breakdown[:hours])}:#{format_number(breakdown[:minutes])}"
+    components = self.components
+    hours = format_component(components[:hours])
+    minutes = format_component(components[:minutes])
+    "#{hours}:#{minutes}"
   end
 
   protected
@@ -82,22 +87,18 @@ class Clock
 
   private
 
-  def apply_values(hours, minutes)
-    self.total_minutes = (hours * MINUTES_PER_HOUR) + minutes
-  end
-
   def total_minutes=(value)
     @total_minutes = value % MINUTES_PER_DAY
   end
 
-  def minutes_breakdown(total_minutes = nil)
+  def components(total_minutes = nil)
     total_minutes ||= self.total_minutes
     hours = total_minutes / MINUTES_PER_HOUR
     minutes = total_minutes - (hours * MINUTES_PER_HOUR)
     { hours: hours, minutes: minutes }
   end
 
-  def format_number(number)
+  def format_component(number)
     number.to_s.rjust(2, '0')
   end
 end
