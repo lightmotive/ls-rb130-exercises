@@ -8,11 +8,11 @@
 # - 24-hour clock.
 #
 # Behaviors:
-# - ::new(hours, minutes):  values as integers; minutes optional
-# - ::at(hours, minutes): self-instantiate, forward args
+# - ::new(hour, minute):  values as integers; minute optional
+# - ::at(hour, minute): self-instantiate, forward args
 #   - `Clock` needs to be stateful to enable `to_s`, `+`, and `-`.
 # - #+, #-: Add or subtract minutes
-# - #== (equivalence): equal if same minutes
+# - #== (equivalence): equal if minutes are equal
 # - to_s: format as "hh:mm"
 
 # * Examples/tests *
@@ -24,8 +24,8 @@
 
 # * Algorithm *
 # MINUTES_PER_DAY = 24 * 60
-# - Instantiate with hours = 0, optional minutes = 0.
-#   - Calculate total minutes from hours and minutes (helper method).
+# - Instantiate with hour = 0, optional minute = 0.
+#   - Calculate total minutes from hour and minute args (helper method).
 # - `::at` method for convenient
 #   - Self-instantiate.
 # - #+ and #-: add or subtract minutes
@@ -38,35 +38,29 @@
 # Key helper methods:
 # - total_minutes=(value)
 #   - @total_minutes = value mod (MINUTES_PER_DAY).
-# - components
-#   - Calculate { hours: ..., minutes: ... } from total_minutes.
 
 class Clock
   HOURS_PER_DAY = 24
   MINUTES_PER_HOUR = 60
   MINUTES_PER_DAY = HOURS_PER_DAY * MINUTES_PER_HOUR
 
-  def initialize(minutes = 0)
-    self.total_minutes = minutes
+  attr_reader :hour, :minute
+
+  def initialize(hour, minute)
+    self.total_minutes = (hour * MINUTES_PER_HOUR) + minute
   end
 
-  def self.at(hours = 0, minutes = 0)
-    new(components_to_minutes(hours, minutes))
-  end
-
-  class << self
-    def components_to_minutes(hours, minutes)
-      (hours * MINUTES_PER_HOUR) + minutes
-    end
+  def self.at(hour, minute = 0)
+    new(hour, minute)
   end
 
   # rubocop:disable Naming/BinaryOperatorParameterName
-  def +(minutes)
-    self.class.new(total_minutes + minutes)
+  def +(minute)
+    self.class.new(0, total_minutes + minute)
   end
 
-  def -(minutes)
-    self + -minutes
+  def -(minute)
+    self.class.new(0, total_minutes - minute)
   end
   # rubocop:enable Naming/BinaryOperatorParameterName
 
@@ -75,10 +69,11 @@ class Clock
   end
 
   def to_s
-    components = self.components
-    hours = format_component(components[:hours])
-    minutes = format_component(components[:minutes])
-    "#{hours}:#{minutes}"
+    format('%<hour>02d:%<minute>02d', self)
+  end
+
+  def to_hash
+    { hour: hour, minute: minute }
   end
 
   protected
@@ -89,16 +84,6 @@ class Clock
 
   def total_minutes=(value)
     @total_minutes = value % MINUTES_PER_DAY
-  end
-
-  def components(total_minutes = nil)
-    total_minutes ||= self.total_minutes
-    hours = total_minutes / MINUTES_PER_HOUR
-    minutes = total_minutes - (hours * MINUTES_PER_HOUR)
-    { hours: hours, minutes: minutes }
-  end
-
-  def format_component(number)
-    number.to_s.rjust(2, '0')
+    @hour, @minute = @total_minutes.divmod(MINUTES_PER_HOUR)
   end
 end
