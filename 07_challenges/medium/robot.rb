@@ -83,6 +83,10 @@ class Unique
     value
   end
 
+  def delete(value)
+    used_values.delete(value)
+  end
+
   private
 
   attr_reader :generate_value, :used_values
@@ -142,6 +146,8 @@ class Robot
   end
 
   def reset
+    previous_name = @name
     @name = @@unique.create
+    @@unique.delete(previous_name)
   end
 end
