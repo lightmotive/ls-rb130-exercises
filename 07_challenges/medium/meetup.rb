@@ -26,8 +26,10 @@ require 'date'
 
 class Meetup
   WEEKDAY_NAMES = %w[sunday monday tuesday wednesday thursday friday saturday].freeze
-  TEENTH_NAME = 'teenth'
-  WEEKDAY_OCCURRENCE_NAMES = (%w[first second third fourth fifth last] << TEENTH_NAME).freeze
+  LAST_OCCURRENCE_NAME = 'last'
+  TEENTH_OCCURRENCE_NAME = 'teenth'
+  WEEKDAY_OCCURRENCE_NAMES = (%w[first second third fourth fifth] <<
+    LAST_OCCURRENCE_NAME << TEENTH_OCCURRENCE_NAME).freeze
 
   attr_reader :year, :month
 
@@ -41,7 +43,7 @@ class Meetup
     weekday_occurrence_name = weekday_occurrence_name.downcase
     validate_day_input(weekday_name, weekday_occurrence_name)
 
-    return teenths_date(weekday_name) if weekday_occurrence_name.downcase == TEENTH_NAME
+    return teenths_occurrence_date(weekday_name) if weekday_occurrence_name.downcase == TEENTH_OCCURRENCE_NAME
 
     weekday_occurrence_date(weekday_name, weekday_occurrence_name)
   end
@@ -64,19 +66,21 @@ class Meetup
     date_start..(date_start.next_month.prev_day)
   end
 
-  def teenths_date(weekday_name)
+  def teenths_occurrence_date(weekday_name)
     dates = Date.new(year, month, 13)..Date.new(year, month, 19)
     dates.find do |date|
-      date.wday == WEEKDAY_NAMES.index_of(weekday_name.downcase)
+      date.wday == WEEKDAY_NAMES.index(weekday_name.downcase)
     end
   end
 
   def weekday_occurrence_date(weekday_name, weekday_occurrence_name)
     dates = month_date_range
-    wday = WEEKDAY_NAMES.index_of(weekday_name)
-    wday_occurrence = WEEKDAY_OCCURRENCE_NAMES.index_of(weekday_occurrence_name)
+    wday = WEEKDAY_NAMES.index(weekday_name)
     dates_by_weekday = dates.group_by(&:wday)
     weekday_dates = dates_by_weekday[wday]
+    return weekday_dates.last if weekday_occurrence_name == LAST_OCCURRENCE_NAME
+
+    wday_occurrence = WEEKDAY_OCCURRENCE_NAMES.index(weekday_occurrence_name)
     weekday_dates[wday_occurrence]
   end
 end
