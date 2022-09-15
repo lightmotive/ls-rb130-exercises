@@ -41,26 +41,12 @@ class Meetup
   def day(weekday_name, weekday_occurrence_name)
     weekday_name = weekday_name.downcase
     weekday_occurrence_name = weekday_occurrence_name.downcase
-    validate_day_input(weekday_name, weekday_occurrence_name)
-
-    return teenths_occurrence_date(weekday_name) if weekday_occurrence_name.downcase == TEENTH_OCCURRENCE_NAME
+    return teenths_occurrence_date(weekday_name) if weekday_occurrence_name == TEENTH_OCCURRENCE_NAME
 
     weekday_occurrence_date(weekday_name, weekday_occurrence_name)
   end
 
   private
-
-  def validate_day_input(weekday_name, weekday_occurrence_name)
-    unless WEEKDAY_NAMES.include?(weekday_name)
-      raise ArgumentError, 'Weekday should be one of ' \
-        "#{WEEKDAY_NAMES.join(', ')} (case-insensitive)."
-    end
-
-    unless WEEKDAY_OCCURRENCE_NAMES.include?(weekday_occurrence_name)
-      raise ArgumentError, 'Weekday wday_occurrence should be one of ' \
-        "#{WEEKDAY_OCCURRENCE_NAMES.join(', ')} (case-insensitive)."
-    end
-  end
 
   def month_date_range
     date_start = Date.new(year, month)
@@ -70,7 +56,7 @@ class Meetup
   def teenths_occurrence_date(weekday_name)
     dates = Date.new(year, month, 13)..Date.new(year, month, 19)
     dates.find do |date|
-      date.wday == WEEKDAY_NAMES.index(weekday_name.downcase)
+      date.wday == WEEKDAY_NAMES.index(weekday_name)
     end
   end
 
