@@ -52,12 +52,13 @@ class Meetup
 
   def validate_day_input(weekday_name, weekday_occurrence_name)
     unless WEEKDAY_NAMES.include?(weekday_name)
-      raise ArgumentError, "Weekday should be one of #{WEEKDAY_NAMES.join(', ')} (case-insensitive)."
+      raise ArgumentError, 'Weekday should be one of ' \
+        "#{WEEKDAY_NAMES.join(', ')} (case-insensitive)."
     end
 
     unless WEEKDAY_OCCURRENCE_NAMES.include?(weekday_occurrence_name)
-      raise ArgumentError,
-            "Weekday wday_occurrence should be one of #{WEEKDAY_OCCURRENCE_NAMES.join(', ')} (case-insensitive)."
+      raise ArgumentError, 'Weekday wday_occurrence should be one of ' \
+        "#{WEEKDAY_OCCURRENCE_NAMES.join(', ')} (case-insensitive)."
     end
   end
 
