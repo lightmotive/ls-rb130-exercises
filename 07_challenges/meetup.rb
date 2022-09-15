@@ -39,6 +39,19 @@ class Meetup
     #   - Raise an exception if inputs don't match associated options
     #     (minor UX improvement).
 
+    month_breakdown = month_breakdown(weekday_name, weekday_occurrence_name)
+
+    #   - Find up to 1 matching day:
+    #     - Return `nil` if no matching day is found.
+    #     - Otherwise, return first matching date as
+    #       Date.new(year, month, month_day).
+  end
+
+  private
+
+  # Return all days in specified year + month if no args are provided.
+  def month_breakdown(weekday_name = nil, weekday_occurrence_name = nil)
+    # Construct and return date range breakdown for given year and month:
     # * Data structure *
     # - Organize a date range into a structure we can filter by Year and
     #   Month (Date Range), then:
@@ -46,15 +59,7 @@ class Meetup
     #     - sort by month day, count (e.g., first Monday), and retrieve the date
     #       at a specific count (Array).
 
-    # * Algorithm *
-    # - `#month_days`: return date range breakdown for given year and month
-    #   as described in data structure section.
-    #   - Filter that breakdown by provided `weekday_name`
-    #     - Filter that selection by provided `weekday_occurrence_name`
-
-    #   - Find up to 1 matching day:
-    #     - Return `nil` if no matching day is found.
-    #     - Otherwise, return first matching date as
-    #       Date.new(year, month, month_day).
+    #   - Filter that breakdown by provided `weekday_name`, if any
+    #     - Filter that selection by provided `weekday_occurrence_name`, if any
   end
 end
