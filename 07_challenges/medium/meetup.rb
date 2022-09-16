@@ -5,10 +5,10 @@ require 'date'
 # * Understand *
 # - Input:
 #   - Meetup.new(year_number, month_number)
-#   - Meetup#day(weekday_name, weekday_occurrence_name)
+#   - Meetup#day(weekday_name, wdomo_name)
 #     - weekday_name options (case-insensitive):
 #       %w[Monday Tuesday Wednesday Thursday Friday Saturday Sunday]
-#     - weekday_occurrence_name options (case-insensitive):
+#     - wdomo_name options (case-insensitive):
 #       %w[first second third fourth fifth last teenth]
 # - Output:
 #   - `nil` if there are no matching days
@@ -18,56 +18,54 @@ require 'date'
 # - Reviewed to identify additional rules, including output format.
 #
 # * Data structure *
-# - Organize a date range into a structure we can filter by Year and
-#   Month (Date Range), then:
-#   - group by weekday_name (Hash), then:
-#     - sort by month day, count (e.g., first Monday), and retrieve the date
-#       at a specific count (Array).
+# - Use hash maps for input conversion.
 
+# * Algorithm *
+# - First, narrow down the date range based on the provided occurrence.
+#   - The first occurrence of any given is_weekday will fall between the 1st and
+#     6 days after that. The second occurrence will fall between the 8th and
+#     6 days after that; and so on.
+#       - The 'teenth' group is 13th - 19th.
+#   - To determine the last day, which is only applicable when we get beyond
+#     the 4th occurrence group (29+ days, due to February having either
+#     28 or 29 days), we choose the smaller of 2 days: the last day of the
+#     group or the last day of the month.
+# - Once we have a narrowed date range for the correct occurrence, find the
+#   first date that matches the specified day.
+#   - Get better performance by determining a day range, then constructing and
+#     testing date objects until one is found.
+
+# "WDOMO": Weekday of the Month Occurrence
 class Meetup
-  WEEKDAY_NAMES = %w[sunday monday tuesday wednesday thursday friday saturday].freeze
-  LAST_OCCURRENCE_NAME = 'last'
-  TEENTH_OCCURRENCE_NAME = 'teenth'
-  WEEKDAY_OCCURRENCE_NAMES = (%w[first second third fourth fifth] <<
-    LAST_OCCURRENCE_NAME << TEENTH_OCCURRENCE_NAME).freeze
+  IS_WEEKDAY_SYM = {
+    'sunday' => :sunday?, 'monday' => :monday?, 'tuesday' => :tuesday?,
+    'wednesday' => :wednesday?, 'thursday' => :thursday?, 'friday' => :friday?,
+    'saturday' => :saturday?
+  }.freeze
 
-  attr_reader :year, :month
+  FIRST_DAY = {
+    'first' => 1, 'second' => 8, 'third' => 15, 'fourth' => 22,
+    'fifth' => 29, 'teenth' => 13, 'last' => nil
+  }.freeze
 
   def initialize(year, month)
     @year = year
     @month = month
+    @last_day = Date.new(@year, @month, -1).day
   end
 
-  def day(weekday_name, weekday_occurrence_name)
-    weekday_name = weekday_name.downcase
-    weekday_occurrence_name = weekday_occurrence_name.downcase
-    return teenths_occurrence_date(weekday_name) if weekday_occurrence_name == TEENTH_OCCURRENCE_NAME
-
-    weekday_occurrence_date(weekday_name, weekday_occurrence_name)
-  end
-
-  private
-
-  def month_date_range
-    date_start = Date.new(year, month)
-    date_start..(date_start.next_month.prev_day)
-  end
-
-  def teenths_occurrence_date(weekday_name)
-    dates = Date.new(year, month, 13)..Date.new(year, month, 19)
-    dates.find do |date|
-      date.wday == WEEKDAY_NAMES.index(weekday_name)
+  def day(weekday_name, wdomo_name)
+    is_weekday_sym = IS_WEEKDAY_SYM[weekday_name.downcase]
+    day_range = day_range(wdomo_name.downcase)
+    day_range.find do |day|
+      date = Date.new(@year, @month, day)
+      break date if date.send(is_weekday_sym)
     end
   end
 
-  def weekday_occurrence_date(weekday_name, weekday_occurrence_name)
-    dates = month_date_range
-    wday = WEEKDAY_NAMES.index(weekday_name)
-    dates_by_weekday = dates.group_by(&:wday)
-    weekday_dates = dates_by_weekday[wday]
-    return weekday_dates.last if weekday_occurrence_name == LAST_OCCURRENCE_NAME
-
-    wday_occurrence = WEEKDAY_OCCURRENCE_NAMES.index(weekday_occurrence_name)
-    weekday_dates[wday_occurrence]
+  def day_range(wdomo_name)
+    first_day = FIRST_DAY[wdomo_name] || (@last_day - 6)
+    last_day = [@last_day, first_day + 6].min
+    first_day..last_day
   end
 end
