@@ -83,6 +83,7 @@ end
 #          { input: [5, 4, 3], expected_output: 'scalene' },
 #          { input: [12, 11, 10], expected_output: 'scalene' }]
 
-# benchmark_report(5, 5, TESTS,
+# benchmark_report(TESTS,
 #                  [{ label: 'Triangle', method: ->(input) { Triangle.new(*input).kind } },
-#                   { label: 'Triangle2', method: ->(input) { Triangle2.new(*input).kind } }])
+#                   { label: 'Triangle2', method: ->(input) { Triangle2.new(*input).kind } }],
+#                  iterations: 5)

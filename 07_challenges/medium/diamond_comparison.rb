@@ -67,10 +67,11 @@ require_relative '../../../ruby-common/benchmark_report'
 TESTS = [{ input: 'E', expected_output: Diamond.make_diamond('E') },
          { input: 'Z', expected_output: Diamond.make_diamond('Z') }].freeze
 
-benchmark_report(5, 5, TESTS,
+benchmark_report(TESTS,
                  [{ label: 'DiamondIncrementSpace', method: ->(input) { Diamond.make_diamond(input) } },
                   { label: 'DiamondCalculateSpace', method: ->(input) { DiamondAlt.make_diamond(input) } },
-                  { label: 'DiamondAlt2', method: ->(input) { DiamondAlt2.make_diamond(input) } }])
+                  { label: 'DiamondAlt2', method: ->(input) { DiamondAlt2.make_diamond(input) } }],
+                 iterations: 5)
 
 # My solution is at least 3x faster than Launch School's proposed solution
 # when testing smaller data sets { A..E }. That performance gap increases with

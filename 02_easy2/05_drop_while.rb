@@ -41,11 +41,11 @@ TESTS = [
 run_tests('arrays_only', TESTS, ->(input) { drop_while(input[0], &input[1]) })
 run_tests('enum_support', TESTS, ->(input) { drop_while_with_enum_support(input[0], &input[1]) })
 
-benchmark_report(5, 500, TESTS,
+benchmark_report(TESTS,
                  [
                    { label: 'arrays_only', method: ->(input) { drop_while(input[0], &input[1]) } },
                    { label: 'enum_support', method: ->(input) { drop_while_with_enum_support(input[0], &input[1]) } }
-                 ])
+                 ], iterations: 500)
 
 # The Array-only implementation is much faster with larger arrays, and not
 # much slower with small arrays, so I would choose that.
