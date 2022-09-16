@@ -37,12 +37,6 @@ require 'date'
 
 # "WDOMO": Weekday of the Month Occurrence
 class Meetup
-  IS_WEEKDAY_SYM = {
-    'sunday' => :sunday?, 'monday' => :monday?, 'tuesday' => :tuesday?,
-    'wednesday' => :wednesday?, 'thursday' => :thursday?, 'friday' => :friday?,
-    'saturday' => :saturday?
-  }.freeze
-
   FIRST_DAY = {
     'first' => 1, 'second' => 8, 'third' => 15, 'fourth' => 22,
     'fifth' => 29, 'teenth' => 13, 'last' => nil
@@ -55,7 +49,7 @@ class Meetup
   end
 
   def day(weekday_name, wdomo_name)
-    is_weekday_sym = IS_WEEKDAY_SYM[weekday_name.downcase]
+    is_weekday_sym = "#{weekday_name.downcase}?".to_sym
     day_range = day_range(wdomo_name.downcase)
     day_range.find do |day|
       date = Date.new(@year, @month, day)
