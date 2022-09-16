@@ -49,21 +49,25 @@ class SimpleLinkedList
     @size = 0
   end
 
+  def empty?
+    @size.zero?
+  end
+
   def push(value)
-    # Create a new element that points to the last element
-    # Keep track of:
-    # - update `@head`, which points to previous @head
-    # - increment `@size`
+    element = Element.new(value, @head)
+    @head = element
+    @size += 1
   end
 
   def pop
-    # Return current `@head`
-    # - Set `@head` to `@head.next`
-    # - Decrement `@size`
+    element_to_pop = @head
+    @head = element_to_pop.next
+    @size -= 1
+    element_to_pop.datum
   end
 
   def peek
-    # return `@head`
+    @head&.datum
   end
 
   def reverse
