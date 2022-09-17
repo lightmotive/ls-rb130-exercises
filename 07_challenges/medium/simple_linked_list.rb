@@ -55,8 +55,8 @@ class SimpleLinkedList
     list = new
     return list if datum_array.nil? || datum_array.empty?
 
-    (datum_array.size - 1).downto(0) do |idx|
-      list.push(datum_array[idx])
+    datum_array.reverse_each do |element|
+      list.push(element)
     end
     list
   end
