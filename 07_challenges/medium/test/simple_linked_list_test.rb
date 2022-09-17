@@ -169,4 +169,10 @@ class SimpleLinkedListTest < Minitest::Test
     data = (1..10).to_a
     assert_equal data, SimpleLinkedList.from_a(data).to_a
   end
+
+  def test_enum_size
+    data = (1..10).to_a
+    list = SimpleLinkedList.from_a(data)
+    assert_equal list.each.size, list.size
+  end
 end

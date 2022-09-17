@@ -54,6 +54,7 @@ class SimpleLinkedList
   end
 
   def each
+    return to_enum { size } unless block_given?
     return if empty?
 
     element = @head
