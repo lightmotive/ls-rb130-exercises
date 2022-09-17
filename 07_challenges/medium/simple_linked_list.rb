@@ -84,6 +84,6 @@ class SimpleLinkedList
   end
 
   def reverse
-    to_enum.each_with_object(self.class.new) { |datum, list| list.push(datum) }
+    each.with_object(self.class.new) { |datum, list| list.push(datum) }
   end
 end
