@@ -67,9 +67,8 @@ class SimpleLinkedList
   end
 
   def push(value)
-    element = Element.new(value, @head)
-    @head = element
     @size += 1
+    @head = Element.new(value, @head)
     self
   end
 
@@ -85,8 +84,6 @@ class SimpleLinkedList
   end
 
   def reverse
-    to_enum.each_with_object(self.class.new) do |datum, list|
-      list.push(datum)
-    end
+    to_enum.each_with_object(self.class.new) { |datum, list| list.push(datum) }
   end
 end
