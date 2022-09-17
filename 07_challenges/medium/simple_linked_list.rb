@@ -18,25 +18,15 @@
 
 # For `SimpleLinkedList` class
 class Element
-  attr_reader :datum, :is_tail
-  alias tail? is_tail
+  attr_reader :datum, :next
 
   def initialize(datum, next_element = nil)
     @datum = datum
-    self.next_element = next_element
+    @next = next_element
   end
 
-  def next
-    next_element
-  end
-
-  private
-
-  attr_reader :next_element
-
-  def next_element=(element)
-    @next_element = element
-    @is_tail = element.nil? ? true : false
+  def tail?
+    @next.nil?
   end
 end
 
@@ -55,9 +45,7 @@ class SimpleLinkedList
     list = new
     return list if datum_array.nil? || datum_array.empty?
 
-    datum_array.reverse_each do |element|
-      list.push(element)
-    end
+    datum_array.reverse_each { |element| list.push(element) }
     list
   end
 
