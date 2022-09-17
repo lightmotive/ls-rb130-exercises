@@ -42,6 +42,8 @@ end
 
 # Use `Element` class for linked items.
 class SimpleLinkedList
+  include Enumerable
+
   attr_reader :head, :size
 
   def initialize
@@ -49,14 +51,37 @@ class SimpleLinkedList
     @size = 0
   end
 
+  def self.from_a(datum_array)
+    list = new
+    return list if datum_array.nil? || datum_array.empty?
+
+    (datum_array.size - 1).downto(0) do |idx|
+      list.push(datum_array[idx])
+    end
+    list
+  end
+
   def empty?
-    @size.zero?
+    @head.nil?
+  end
+
+  def each
+    return if empty?
+
+    element = @head
+    loop do
+      yield element.datum
+      break if element.tail?
+
+      element = element.next
+    end
   end
 
   def push(value)
     element = Element.new(value, @head)
     @head = element
     @size += 1
+    self
   end
 
   def pop
@@ -71,17 +96,8 @@ class SimpleLinkedList
   end
 
   def reverse
-    # head becomes tail: create new set of linked element starting with @head
-  end
-
-  def from_a(datum_array)
-    # Create linked elements from array elements:
-    # - Enumerate through array from last to first so head datum points to
-    #   the first element in the array.
-  end
-
-  def to_a
-    # Iterate through linked elements until reaching the tail,
-    # prepending/unshifting the datum of each into a new array.
+    to_enum.each_with_object(self.class.new) do |datum, list|
+      list.push(datum)
+    end
   end
 end
