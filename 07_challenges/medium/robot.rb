@@ -146,8 +146,10 @@ class Robot
   end
 
   def reset
-    previous_name = @name
+    @@unique.delete(@name)
+    # Delete current @name first to ensure all possible names are available.
+    # Alternatively, delete it after to ensure the new name is different;
+    # that would reduce possible names by 1.
     @name = @@unique.create
-    @@unique.delete(previous_name)
   end
 end
