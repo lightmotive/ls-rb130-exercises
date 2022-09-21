@@ -116,7 +116,7 @@ class CustomSet
   end
 
   def add_array(elements)
-    elements&.each(&method(:add))
+    elements&.uniq&.each(&method(:add))
     self
   end
 
