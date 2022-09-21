@@ -79,9 +79,6 @@ class CustomSet
 
   def subset?(other)
     elements.all? { |e| other.contains?(e) }
-    # Better performance if we implement a public or protected `sort` method,
-    # then compare the sorted results. To build agiley, implement later if
-    # needed.
   end
 
   def disjoint?(other)
