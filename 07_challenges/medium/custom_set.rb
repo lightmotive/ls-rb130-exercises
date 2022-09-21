@@ -51,28 +51,28 @@
 class CustomSet
   # - Initialize as an empty set by default. Optionally provide an array of
   #   Integer elements.
-  def initialize(array = [])
-    @array = []
-    add_array(array)
+  def initialize(elements = [])
+    @elements = []
+    add_array(elements)
   end
 
   def empty?
-    array.empty?
+    elements.empty?
   end
 
   def contains?(element)
-    array.include?(element)
+    elements.include?(element)
   end
 
   def add(element)
-    array.push(element) unless contains?(element)
+    elements.push(element) unless contains?(element)
     self
   end
 
   def ==(other)
-    return false if array.size != other.size
+    return false if elements.size != other.size
 
-    array.all? { |e| other.contains?(e) }
+    elements.all? { |e| other.contains?(e) }
     # Better performance if we implement a public or protected `sort` method,
     # then compare the sorted results. To build agiley, implement later if
     # needed.
@@ -81,21 +81,21 @@ class CustomSet
   alias eql? ==
 
   def subset?(other)
-    array.all? { |e| other.contains?(e) }
+    elements.all? { |e| other.contains?(e) }
   end
 
   def disjoint?(other)
-    array.none? { |e| other.contains?(e) }
+    elements.none? { |e| other.contains?(e) }
   end
 
   def intersection(other)
-    array.each_with_object(self.class.new) do |e, set|
+    elements.each_with_object(self.class.new) do |e, set|
       set.add(e) if other.contains?(e)
     end
   end
 
   def difference(other)
-    array.each_with_object(self.class.new) do |e, set|
+    elements.each_with_object(self.class.new) do |e, set|
       set.add(e) unless other.contains?(e)
     end
   end
@@ -108,19 +108,19 @@ class CustomSet
   protected
 
   def size
-    array.size
+    elements.size
   end
 
   def to_a
-    array.dup
+    elements.dup
   end
 
-  def add_array(array)
-    array&.each(&method(:add))
+  def add_array(elements)
+    elements&.each(&method(:add))
     self
   end
 
   private
 
-  attr_reader :array
+  attr_reader :elements
 end
