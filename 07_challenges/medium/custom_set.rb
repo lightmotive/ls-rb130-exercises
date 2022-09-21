@@ -31,10 +31,10 @@
 #   subset of the provided CustomSet arg, regardless of order.
 # - `disjoint?(CustomSet value)`: return `true` if the current set shares no
 #   elements with the provided set. Return `true` if both sets are empty.
-# - `intersection(CustomSet value)`: return a new CustomSet containing matching
-#   elements.
+# - `intersection(CustomSet value)`: return a new CustomSet that contains
+#   elements from the current set that are also in the provided set.
 # - `difference(CustomSet value)`: return a new CustomSet containing elements
-#   *from the current set* that are different from the provided set.
+#   *from the current set* that are not in the provided set.
 # - `union(CustomSet value)`: return a new CustomSet containing unique elements
 #   from both the current and provided sets.
 
@@ -47,4 +47,80 @@
 #   as a collaborator object, let's use an Array as the internal data
 #   structure for this exercise.
 
-# Algorithm
+# Store and compare unique Integer elements with an unspecified order.
+class CustomSet
+  # - Initialize as an empty set by default. Optionally provide an array of
+  #   Integer elements.
+  def initialize(array = [])
+    @array = []
+    add_array(array)
+  end
+
+  def empty?
+    array.empty?
+  end
+
+  def contains?(element)
+    array.include?(element)
+  end
+
+  def add(element)
+    array.push(element) unless contains?(element)
+    self
+  end
+
+  def ==(other)
+    return false if array.size != other.size
+
+    array.all? { |e| other.contains?(e) }
+    # Better performance if we implement a public or protected `sort` method,
+    # then compare the sorted results. To build agiley, implement later if
+    # needed.
+  end
+
+  alias eql? ==
+
+  def subset?(other)
+    array.all? { |e| other.contains?(e) }
+  end
+
+  def disjoint?(other)
+    array.none? { |e| other.contains?(e) }
+  end
+
+  def intersection(other)
+    array.each_with_object(self.class.new) do |e, set|
+      set.add(e) if other.contains?(e)
+    end
+  end
+
+  def difference(other)
+    array.each_with_object(self.class.new) do |e, set|
+      set.add(e) unless other.contains?(e)
+    end
+  end
+
+  def union(other)
+    set = self.class.new
+    set.add_array(to_a).add_array(other.to_a)
+  end
+
+  protected
+
+  def size
+    array.size
+  end
+
+  def to_a
+    array.dup
+  end
+
+  def add_array(array)
+    array&.each(&method(:add))
+    self
+  end
+
+  private
+
+  attr_reader :array
+end
