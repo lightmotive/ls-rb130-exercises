@@ -10,13 +10,7 @@
 module Decryption
   refine String do
     def decrypt_rot13
-      each_char.map { |char| translate_rot13_char(char) }.join
-    end
-
-    private
-
-    def translate_rot13_char(char)
-      char.tr('A-MN-Za-mn-z', 'N-ZA-Mn-za-m')
+      tr('A-Za-z', 'N-ZA-Mn-za-m')
     end
   end
 end
