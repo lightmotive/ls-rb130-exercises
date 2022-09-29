@@ -31,14 +31,15 @@
 #   - `initialize` accepts any block that is expected to generate a value
 #     (usually random); the block is converted to a Proc and saved to an
 #     instance variable to serve as a collaborator.
-#   - Abstracting this responsibility to this class enables reusing `Unique`
+#   - Abstracting that responsibility to this class enables reusing `Unique`
 #     to ensure any type of generated value (whatever a block returns) is
 #     unique in any program. There's probably at least one Gem that provides
-#     a more advanced and configurable version of this.
+#     a more advanced and configurable version of that, but this is a good
+#     learning exercise.
 # 2. `RobotName`: Statelessly generate a random robot name that matches
 #     `/\A[A-Z]{2}\d{3}\z/`.
 #   - Not guaranteed to be unique, hence the need for the `Unique` class.
-#   - Abstracting this responsibility to this class makes it easier to read,
+#   - Abstracting that responsibility to this class makes it easier to read,
 #     understand, and, perhaps in the future, modify or entirely replace the
 #     class to generate robot names with different logic.
 # 3. `Robot`: Statefully provide a `name` value and a `reset` behavior.
@@ -46,10 +47,11 @@
 #     `RobotName.generate`; assigns that instance to a class variable to act as
 #     a class-level collaborator (`@@unique = Unique.new { RobotName.generate }).
 #   - `#reset` generates and assigns a new unique name using `@@unique.create`.
-#   - Thanks to the abstractions above, this class is simple and easy to maintain.
+#   - Thanks to the abstractions above, this class is easy to understand and maintain.
 #     We can replace the `Unique` class or what the block provides to `Unique` to
 #     change important behaviors without wading through a single class that does
-#     three different things.
+#     three different things. Instead, the three major responsibilities are
+#     conceptualized into separate classes.
 
 # ** Implementation **
 
@@ -106,6 +108,16 @@ end
 #
 # Public behaviors:
 # - `::generate`: generate and return the random name.
+#
+# Possible name permutations:
+# - For each 2-upper-char letter combination (676 permutations), there are
+#   1,000 3-digit number permutations. 676 * 1000 = 676,000 possible names.
+# - Randomly generating a name and using `Unique` would slow to crawl with
+#   thousands of names to check after each generation, not to mention retrying
+#   random generation when a randomly generated name is already taken.
+#   Therefore, it would be better to generate all possible permutations, then
+#   sample + flag the name as taken. See robot_fast.rb in this file's
+#   directory for that implementation.
 class RobotName
   def self.generate
     name = String.new
