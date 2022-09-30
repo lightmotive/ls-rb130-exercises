@@ -96,11 +96,12 @@ class Unique
   def unique?(value)
     return false if value.nil?
 
-    !used_values.include?(value)
+    used_values.bsearch { |used_value| value <=> used_value }.nil?
   end
 
   def save(value)
-    used_values << value
+    insert_at = used_values.bsearch_index { |used_value| used_value > value }
+    insert_at.nil? ? used_values.push(value) : used_values.insert(insert_at, value)
   end
 end
 
