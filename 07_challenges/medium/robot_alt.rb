@@ -15,22 +15,24 @@
 # - Test setup:
 # robots = []
 # start_time = Time.now
-# while robots.size < 676_000
-#   robots.push(Robot.new)
-#   puts "Count: #{robots.size}"
-# end
+# puts 'Generating 676,000 robots...'
+#
+# robots.push(Robot.new) while robots.size < 676_000
 # seconds_elapsed = Time.now - start_time
-# puts "Generated #{robots.size} robots in #{seconds_elapsed.ceil} seconds | " \
+#
+# puts "Generated #{robots.size} robots in #{seconds_elapsed} seconds | " \
 #      "Avg. robots/second: #{robots.size.fdiv(seconds_elapsed).floor}"
+# puts robots.map(&:name).uniq.size
 
 # ** robot.rb **
-# Results: Generated 676,000 robots in 94 seconds | Avg. robots/second: 7,204
-# - Reasonably fast, but it slows to a crawl for the last few generated names
-#   because it takes time to randomly generate what hasn't already been used.
-#   Performance could be inconsistent because of that.
+# Results: Generated 676,000 robots in 51-56 seconds | Avg. robots/second: 12,000 - 13,000
+# - Reasonably fast, though it slows to a crawl for the last several generated
+#   names because it takes time to randomly generate what hasn't already been
+#   used. Performance will be inconsistent because of that random nature and
+#   the bsearch algorithm.
 
 # ** robot_alt.rb **
-# Results: Generated 676,000 robots in 3 seconds | Avg. robots/second: 254,202
+# Results: Generated 676,000 robots in about 0.18 seconds | Avg. robots/second: about 3,680,000
 # - Consistently fast through the end. Total time includes startup time for
 #   generating all possible names.
 
