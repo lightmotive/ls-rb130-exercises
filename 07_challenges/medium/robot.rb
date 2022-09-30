@@ -154,7 +154,7 @@ class Robot
   attr_reader :name
 
   def initialize
-    reset
+    @name = @@unique.create
   end
 
   def reset
