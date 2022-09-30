@@ -25,7 +25,9 @@
 
 # ** robot.rb **
 # Results: Generated 676,000 robots in 94 seconds | Avg. robots/second: 7,204
-# - Reasonably fast, though it slows to a crawl for the last few generated names.
+# - Reasonably fast, but it slows to a crawl for the last few generated names
+#   because it takes time to randomly generate what hasn't already been used.
+#   Performance could be inconsistent because of that.
 
 # ** robot_alt.rb **
 # Results: Generated 676,000 robots in 3 seconds | Avg. robots/second: 254,202
