@@ -13,31 +13,41 @@
 # (host-dependent):
 
 # - Test setup:
+# start_time_init = Time.now
+#
+# ...class definition/require statement here...
+#
+# puts "Init time: #{Time.now - start_time_init}"
+#
 # robots = []
 # start_time = Time.now
 # puts 'Generating 676,000 robots...'
 #
 # robots.push(Robot.new) while robots.size < 676_000
-# seconds_elapsed = Time.now - start_time
+# run_seconds = Time.now - start_time
 #
-# puts "Generated #{robots.size} robots in #{seconds_elapsed} seconds | " \
-#      "Avg. robots/second: #{robots.size.fdiv(seconds_elapsed).floor}"
+# puts "Generated #{robots.size} robots in #{run_seconds} seconds | " \
+#      "Avg. robots/second: #{robots.size.fdiv(run_seconds).floor}"
 # puts robots.map(&:name).uniq.size
 
 # ** robot.rb **
-# Results: Generated 676,000 robots in 51-56 seconds | Avg. robots/second: 12,000 - 13,000
+# Results: Initialize time: negligible |
+#          Generated 676,000 robots in 47-56 seconds |
+#          Avg. robots/second: 12,000 - 14,000
 # - Reasonably fast, though it slows to a crawl for the last several generated
 #   names because it takes time to randomly generate what hasn't already been
 #   used. Performance will be inconsistent because of that random nature and
-#   the bsearch algorithm.
+#   the bsearch algorithm. However, startup time is not impacted.
 
 # ** robot_alt.rb **
-# Results: Generated 676,000 robots in about 0.18 seconds | Avg. robots/second: about 3,680,000
-# - Consistently fast through the end. Total time includes startup time for
-#   generating all possible names.
+# Results: Initialize time (generate all possible names): ~0.65 seconds |
+#          Generated 676,000 robots in about 0.18 seconds |
+#          Avg. robots/second: about 3,680,000
+# - There's a startup performance penalty of ~0.65 seconds, but generation is
+#   then consistently fast through the end.
 
 # The robot_alt.rb performance boost carries these tradeoffs because it
-# generates and stores all possible names at startup:
+# generates and randomizes all possible names at startup:
 # - Slightly slower startup time; probably not a problem in a scenario where a
 #   class/factory is initialized only occasionally.
 # - Higher initial memory usage; we're not storing a lot of data, so it likely
