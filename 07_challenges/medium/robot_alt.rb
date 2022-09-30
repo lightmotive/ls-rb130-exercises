@@ -1,37 +1,80 @@
 # frozen_string_literal: true
 
-# This is an alternative to the implementation in `robot.rb`.
-# It passes the same `./test/robot_test.rb` tests that `robot.rb` passed; see
-# `./test/robot_fast_test.rb`.
+# This is a higher-performance alternative to the `robot.rb` implementation.
+# It passes the same `./test/robot_test.rb` tests because the `Robot` class uses
+# the same public interface; see `./test/robot_fast_test.rb`.
 # For this implementation, we don't need the added complexity of a `Unique`
-# class. `RobotName` provides shuffled names and tracks which are used.
+# class. `RobotName` provides a names from a pre-generated and shuffled list,
+# then tracks which names are used.
 
-# Surprisingly, this implementation has a significantly slower runtime after
-# generating 32k robots when compared with `robot.rb`.
-# It also carries the significant tradeoffs of slower startup time and
-# higher initial memory usage because it generates and stores all names when
-# the program first runs.
+# The performance of this implementation is drastically better because it
+# doesn't need to randomly generate a name and check whether that name has
+# already been used. Here's a relative performance comparison
+# (host-dependent):
 
-# This implementation is disadvantaged when generating random names like this.
-# Perhaps it would have an advantage if name generation was complex...but even
-# then, we could use a GUID library to generate random names without
-# significant tradeoffs.
+# - Test setup:
+# robots = []
+# start_time = Time.now
+# while robots.size < 676_000
+#   robots.push(Robot.new)
+#   puts "Count: #{robots.size}"
+# end
+# seconds_elapsed = Time.now - start_time
+# puts "Generated #{robots.size} robots in #{seconds_elapsed.ceil} seconds | " \
+#      "Avg. robots/second: #{robots.size.fdiv(seconds_elapsed).floor}"
 
-# Anyway, fun way to practice with the Ruby language and a reminder of the
-# importance of encapsulation, especially separation of concerns in this case:
+# ** robot.rb **
+# Results: Generated 676,000 robots in 94 seconds | Avg. robots/second: 7,204
+# - Reasonably fast, though it slows to a crawl for the last few generated names.
+
+# ** robot_alt.rb **
+# Results: Generated 676,000 robots in 3 seconds | Avg. robots/second: 254,202
+# - Consistently fast through the end. Total time includes startup time for
+#   generating all possible names.
+
+# The robot_alt.rb performance boost carries these tradeoffs because it
+# generates and stores all possible names at startup:
+# - Slightly slower startup time; probably not a problem in a scenario where a
+#   class/factory is initialized only occasionally.
+# - Higher initial memory usage; we're not storing a lot of data, so it likely
+#   wouldn't be an issue.
+
+# Choosing the best implementation would require knowing how many robots would
+# be online at once, and how quickly those robots would need to be brought
+# online.
+
+# This exploration also demonstrates the importance of encapsulation, especially
+# separation of concerns in this case:
 # - There was no need to alter the `Robot` class' public interface.
 # - Replacing the `Unique` class was possible with minimal `Robot` class changes.
+
+# *Implementation overview:*
+#
+# 1. Generate two unique **permutation sets**: one for 2 upper-case letters and
+#    one for 3 digits; **map the product** of those sets to an array of joined
+#    strings. That `map` return value now contains all possible unique names;
+#    save to `names_available` attribute.
+# 2. **Shuffle** `names_available` to satisfy the randomness requirement.
+# 3. **To get an available name:** shift the first name from `names_available`,
+#    saving it to another array assigned to a `names_used` attribute before
+#    returning the name. (Technically, `names_used` isn't necessary in this
+#     context, but a real-world implementation would probably need to keep track
+#     of what has been "used.")
+# 4. To `reset` a robot and make the name available, delete the provided name
+#    from the `names_used` array and add it to the end of the `names_available`
+#    array.
 
 # Generate and track usage of Robot names matching /\A[A-Z]{2}\d{3}\z/.
 #
 # Public behaviors:
-# - `#select!`: randomly select a name that hasn't been used, and make it
-#   unavailable for use until released.
+# - `#select!`: select a name from a pre-shuffled list of available names, then
+#   make that name unavailable for use until released.
 # - `#release!(name)`: release a previously selected name; returns `self`.
 #
 # Possible name permutations:
-# - For each 2-upper-char letter combination (676 permutations), there are
-#   1,000 3-digit number permutations. 676 * 1000 = 676,000 possible names.
+# - For each 2-upper-char letter combination, of which there are 676
+#   permutations (26^2), there are 1,000 3-digit number permutations (10^3).
+#   676 * 1000 = 676,000 possible names.
 class RobotNames
   def initialize
     initialize_names!
@@ -59,16 +102,21 @@ class RobotNames
   attr_reader :names_available, :names_used
 
   def initialize_names!
-    @names_available = letter_digit_sequences(2, 3).map do |letters, digits|
+    name_possibilities = letter_digit_sequences(2, 3)
+    @names_available = name_possibilities.map do |letters, digits|
       letters.join + digits.join
-    end.shuffle
+    end
+    @names_available.shuffle!
     @names_used = []
   end
 
   def letter_digit_sequences(letter_count, digit_count)
     letter_permutations = char_permutations('A'..'Z', letter_count)
     digit_permutations = char_permutations(0..9, digit_count)
-    letter_permutations.enum_for(:product, digit_permutations)
+    letter_permutations.enum_for(:product, digit_permutations) do
+      # Calculate size without enumerating:
+      letter_permutations.size * digit_permutations.size
+    end
   end
 
   def char_permutations(char_range, length)
@@ -90,7 +138,7 @@ class Robot
   attr_reader :name
 
   def initialize
-    reset
+    @name = @@robot_names.select!
   end
 
   def reset
