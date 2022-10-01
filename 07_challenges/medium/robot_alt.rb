@@ -81,8 +81,8 @@
 # Generate and track usage of Robot names matching /\A[A-Z]{2}\d{3}\z/.
 #
 # Public behaviors:
-# - `#select!`: select a name from a pre-shuffled list of available names, then
-#   make that name unavailable for use until released.
+# - `#use!`: shift a name from a pre-shuffled list of available names, then
+#   block that name from further use until released.
 # - `#release!(name)`: release a previously selected name; returns `self`.
 #
 # Possible name permutations:
@@ -94,7 +94,7 @@ class RobotNames
     initialize_names!
   end
 
-  def select!
+  def use!
     raise StandardError, 'All names are in use' if names_available.empty?
 
     name = names_available.shift
@@ -143,27 +143,27 @@ class RobotNames
   end
 end
 
-# Robot with a randomly selected and guaranteed-unique name with
-# reset capability. Uses `RobotName` to generate, select, and track usage of
-# names.
+# Robot with a randomly generated and guaranteed-unique name with reset
+# capability. Uses `RobotName` to generate, use, and track usage of names.
 #
 # Public behaviors:
+# - `::new`: assign unused name to `@name`.
 # - `#name`: return current `@name` value.
-# - `#reset`: randomly select a name not already in use and assign it to
+# - `#reset`: release the current name and assign the next unused name to
 #   `@name`.
 class Robot
   @@robot_names = RobotNames.new
   attr_reader :name
 
   def initialize
-    @name = @@robot_names.select!
+    @name = @@robot_names.use!
   end
 
   def reset
     @@robot_names.release!(@name)
     # Release current @name first to ensure all possible names are available.
-    # Alternatively, `release!` after `select!` to ensure the new name is
+    # Alternatively, `release!` after `use!` to ensure the new name is
     # different; that would reduce possible names by 1.
-    @name = @@robot_names.select!
+    @name = @@robot_names.use!
   end
 end
