@@ -104,9 +104,10 @@ class RobotNames
   end
 
   def release!(name)
-    released_name = names_used.delete(name)
-    return nil if released_name.nil?
+    delete_at_idx = names_used_idx(name)
+    return if delete_at_idx.nil?
 
+    released_name = names_used.delete_at(delete_at_idx)
     names_available.push(released_name)
     self
   end
@@ -135,6 +136,10 @@ class RobotNames
 
   def char_permutations(char_range, length)
     char_range.to_a.repeated_permutation(length).to_a.uniq
+  end
+
+  def names_used_idx(name)
+    names_used.bsearch_index { |used| name <=> used }
   end
 end
 
