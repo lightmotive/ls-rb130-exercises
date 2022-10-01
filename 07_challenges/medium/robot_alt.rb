@@ -40,11 +40,11 @@
 #   the bsearch algorithm. However, startup time is not impacted.
 
 # ** robot_alt.rb **
-# Results: Initialize time (generate and shuffle all possible names): ~0.65 seconds |
-#          Generated 676,000 robots in about 0.18 seconds |
-#          Avg. robots/second: about 3,680,000
-# - There's a startup performance penalty of ~0.65 seconds, but generation is
-#   then consistently fast through the end.
+# Results: Initialize time (generate and shuffle all possible names): ~0.64 seconds |
+#          Generated 676,000 robots in ~0.22 seconds |
+#          Avg. robots/second: ~3,000,000
+# - The ~0.64 second startup performance penalty yields vastly improved
+#   generation time and consistent performance.
 
 # The robot_alt.rb performance boost carries these tradeoffs because it
 # generates and randomizes all possible names at startup:
