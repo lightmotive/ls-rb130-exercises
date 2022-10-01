@@ -134,8 +134,7 @@ class RobotNames
   end
 
   def char_permutations(char_range, length)
-    chars = char_range.to_a
-    (chars * length).permutation(length).to_a.uniq
+    char_range.to_a.repeated_permutation(length).to_a.uniq
   end
 end
 
