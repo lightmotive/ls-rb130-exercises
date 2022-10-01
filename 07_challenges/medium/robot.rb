@@ -86,7 +86,10 @@ class Unique
   end
 
   def delete(value)
-    used_values.delete(value)
+    delete_at_idx = used_values.bsearch_index do |used_value|
+      value <=> used_value
+    end
+    used_values.delete_at(delete_at_idx) unless delete_at_idx.nil?
   end
 
   private
@@ -100,8 +103,14 @@ class Unique
   end
 
   def save(value)
-    insert_at = used_values.bsearch_index { |used_value| used_value > value }
-    insert_at.nil? ? used_values.push(value) : used_values.insert(insert_at, value)
+    insert_before_idx = used_values.bsearch_index do |used_value|
+      used_value > value
+    end
+    if insert_before_idx.nil?
+      used_values.push(value)
+    else
+      used_values.insert(insert_before_idx, value)
+    end
   end
 end
 
