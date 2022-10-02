@@ -10,43 +10,73 @@
 # The performance of this implementation is drastically better because it
 # doesn't need to randomly generate a name and check whether that name has
 # already been used. Here's a relative performance comparison
-# (host-dependent):
+# (host-dependent; these were run on a 2021 M1 Max MacBook Pro):
 
-# - Test setup:
-# start_time_init = Time.now
-#
-# ...class definition/require statement here...
-#
-# puts "Init time: #{Time.now - start_time_init}"
-#
+# ** Test setup **
+# # Init performance:
+# init_start_time = Time.now
+
+# ** require test file here **
+
+# puts "Init seconds: #{Time.now - init_start_time}"
+
 # robots = []
-# start_time = Time.now
-# puts 'Generating 676,000 robots...'
-#
-# robots.push(Robot.new) while robots.size < 676_000
-# run_seconds = Time.now - start_time
-#
-# puts "Generated #{robots.size} robots in #{run_seconds} seconds | " \
-#      "Avg. robots/second: #{robots.size.fdiv(run_seconds).floor}"
+# generate_count = 676_000
+
+# # Create performance
+# create_start_time = Time.now
+# puts "Generating #{generate_count} robots..."
+
+# robots.push(Robot.new) while robots.size < generate_count
+
+# create_seconds = Time.now - create_start_time
+# puts "Generated #{robots.size} robots in #{create_seconds} seconds"
+# puts "Avg. robots/second: #{robots.size.fdiv(create_seconds).floor}"
 # puts robots.map(&:name).uniq.size
 
+# # Reset performance
+# reset_start_time = Time.now
+# robots.shuffle!
+# reset_count = 10_000
+
+# reset_count.times do
+#   robots.shift.reset
+#   puts 'reset complete'
+# end
+
+# reset_seconds = Time.now - reset_start_time
+# puts "Reset #{reset_count} robots in #{reset_seconds} seconds"
+# puts "Avg. reset robots/second: #{reset_count.fdiv(reset_seconds)}"
+
 # ** robot.rb **
-# Results: Initialize time: negligible |
-#          Generated 676,000 robots in 47-56 seconds |
-#          Avg. robots/second: 12,000 - 14,000
-# - Reasonably fast, though it slows to a crawl for the last several generated
-#   names because it takes time to randomly generate what hasn't already been
-#   used. Performance will be inconsistent because of that random nature and
-#   the bsearch algorithm. However, startup time is not impacted.
+# Create performance:
+#   Init (names are not pre-generated): negligible |
+#   Generated 676,000 robots in 47-56 seconds |
+#   Avg. robots/second: 12,000 - 14,000
+#   - Reasonably fast, though it slows to a crawl for the last several generated
+#     names because it takes time to randomly generate what hasn't already been
+#     used. Performance will be inconsistent because of that random nature and
+#     the bsearch algorithm. However, startup time is not impacted.
+# Reset performance:
+#   Did not finish in a reasonable timeframe; ~2 seconds/reset.
+#   - The slower creation time also slows the reset time. With 670K
+#     possibilities, the random name implementation becomes a deal-breaker.
 
 # ** robot_alt.rb **
-# Results: Initialize time (generate and shuffle all possible names): ~0.64 seconds |
-#          Generated 676,000 robots in ~0.22 seconds |
-#          Avg. robots/second: ~3,000,000
-# - The ~0.64 second startup performance penalty yields vastly improved
-#   generation time and consistent performance.
+# Create performance:
+#   Init (generate and shuffle all possible names): ~0.63 seconds
+#   Generated 676,000 robots in ~22 seconds
+#   Avg. robots/second: ~30,000
+#   - The ~0.64 second startup performance penalty yields vastly improved
+#     generation time and consistent performance regardless of the number of
+#     active robots.
+# Reset performance:
+#   Reset 10,000 robots in ~1.25 seconds
+#   Avg. reset robots/second: ~7900
+#   - This is clearly the implementation I'd choose were scalability a
+#     requirement.
 
-# The robot_alt.rb performance boost carries these tradeoffs because it
+# The robot_alt.rb performance boost carries these trade-offs because it
 # generates and randomizes all possible names at startup:
 # - Slightly slower startup time; probably not a problem in a scenario where a
 #   class/factory is initialized only occasionally.
@@ -98,7 +128,7 @@ class RobotNames
     raise StandardError, 'All names are in use' if names_available.empty?
 
     name = names_available.shift
-    names_used.push(name)
+    use_name!(name)
 
     name
   end
@@ -136,6 +166,11 @@ class RobotNames
 
   def char_permutations(char_range, length)
     char_range.to_a.repeated_permutation(length).to_a.uniq
+  end
+
+  def use_name!(name)
+    insert_before_idx = names_used.bsearch_index { |used| used > name } || names_used.size
+    names_used.insert(insert_before_idx, name)
   end
 
   def names_used_idx(name)
