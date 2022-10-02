@@ -30,8 +30,7 @@
 # robots.push(Robot.new) while robots.size < generate_count
 
 # create_seconds = Time.now - create_start_time
-# puts "Generated #{robots.size} robots in #{create_seconds} seconds"
-# puts "Avg. robots/second: #{robots.size.fdiv(create_seconds).floor}"
+# puts "Generated #{robots.size} robots in #{create_seconds} seconds (~#{robots.size.fdiv(create_seconds).floor}/sec)"
 # puts robots.map(&:name).uniq.size
 
 # # Reset performance
@@ -43,36 +42,35 @@
 # reset_count.times { robots.shift.reset }
 
 # reset_seconds = Time.now - reset_start_time
-# puts "Reset #{reset_count} robots in #{reset_seconds} seconds"
-# puts "Avg. reset robots/second: #{reset_count.fdiv(reset_seconds)}"
+# puts "Reset #{reset_count} robots in #{reset_seconds} seconds (#{reset_count.fdiv(reset_seconds)}/sec)"
 
 # ** robot.rb **
 # Create performance:
-#   Init (names are not pre-generated): negligible |
-#   Generated 676,000 robots in 47-56 seconds |
-#   Avg. robots/second: 12,000 - 14,000
-#   - Reasonably fast, though it slows to a crawl for the last several generated
-#     names because it takes time to randomly generate what hasn't already been
-#     used. Performance will be inconsistent because of that random nature and
-#     the bsearch algorithm. However, startup time is not impacted.
+#   Init (names are not pre-generated): negligible
+#   Generated 676,000 robots in 47-56 seconds (~12,000-14,000/second)
+#   - Analysis: reasonably fast implementation that slows to a crawl when all
+#     names are used because it takes time to randomly generate and check what
+#     hasn't already been used. Performance will be inconsistent because of that
+#     random nature and the binary search algorithm. However, startup time is
+#     not impacted, so this would be a good solution for small-scale scenarios.
 # Reset performance:
-#   Did not finish in a reasonable timeframe; ~2 seconds/reset.
+#   X*X Did not finish in a reasonable timeframe; ~2 seconds/reset.
 #   - The slower creation time also slows the reset time. With 670K
-#     possibilities, the random name implementation becomes a deal-breaker.
+#     possibilities, the random name implementation would be a deal-breaker
+#     in scenarios requiring maximum scale.
 
 # ** robot_alt.rb **
 # Create performance:
 #   Init (generate and shuffle all possible names): ~0.63 seconds
-#   Generated 676,000 robots in ~22 seconds
-#   Avg. robots/second: ~30,000
-#   - The ~0.64 second startup performance penalty yields vastly improved
-#     generation time and consistent performance regardless of the number of
+#   Generated 676,000 robots in ~0.23 seconds (~3,000,000/second)
+#   - The ~0.63 second startup performance penalty yields vastly improved
+#     creation time and consistent performance regardless of the number of
 #     active robots.
 # Reset performance:
-#   Reset 10,000 robots in ~1.25 seconds
-#   Avg. reset robots/second: ~7900
-#   - This is clearly the implementation I'd choose were scalability a
-#     requirement.
+#   Reset 200 robots in ~4.5 seconds (~44/second)
+#   - Resetting robots is somewhat slow because it uses **Array#delete* instead
+#     of a binary search implementation. See ./robot_scalable.rb, which solves
+#     that scalability problem.
 
 # The robot_alt.rb performance boost carries these trade-offs because it
 # generates and randomizes all possible names at startup:
@@ -125,14 +123,16 @@ class RobotNames
   def use!
     raise StandardError, 'All names are in use' if names_available.empty?
 
-    use_name!
+    name = names_available.shift
+    names_used.push(name)
+
+    name
   end
 
   def release!(name)
-    delete_at_idx = names_used_idx(name)
-    return if delete_at_idx.nil?
+    released_name = names_used.delete(name)
+    return self if released_name.nil?
 
-    released_name = names_used.delete_at(delete_at_idx)
     names_available.push(released_name)
     self
   end
@@ -162,29 +162,8 @@ class RobotNames
   def char_permutations(char_range, length)
     char_range.to_a.repeated_permutation(length).to_a.uniq
   end
-
-  def use_name!
-    name = names_available.shift
-    insert_before_idx =
-      names_used.bsearch_index { |used| used > name } ||
-      names_used.size
-    names_used.insert(insert_before_idx, name)
-    name
-  end
-
-  def names_used_idx(name)
-    names_used.bsearch_index { |used| name <=> used }
-  end
 end
 
-# Robot with a randomly generated and guaranteed-unique name with reset
-# capability. Uses `RobotName` to generate, use, and track usage of names.
-#
-# Public behaviors:
-# - `::new`: assign unused name to `@name`.
-# - `#name`: return current `@name` value.
-# - `#reset`: release the current name and assign the next unused name to
-#   `@name`.
 class Robot
   @@robot_names = RobotNames.new
   attr_reader :name
@@ -195,9 +174,6 @@ class Robot
 
   def reset
     @@robot_names.release!(@name)
-    # Release current @name first to ensure all possible names are available.
-    # Alternatively, `release!` after `use!` to ensure the new name is
-    # different; that would reduce possible names by 1.
     @name = @@robot_names.use!
   end
 end
