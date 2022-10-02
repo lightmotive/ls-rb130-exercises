@@ -39,10 +39,8 @@
 # robots.shuffle!
 # reset_count = 10_000
 
-# reset_count.times do
-#   robots.shift.reset
-#   puts 'reset complete'
-# end
+# puts "Resetting #{reset_count} robots..."
+# reset_count.times { robots.shift.reset }
 
 # reset_seconds = Time.now - reset_start_time
 # puts "Reset #{reset_count} robots in #{reset_seconds} seconds"
@@ -127,10 +125,7 @@ class RobotNames
   def use!
     raise StandardError, 'All names are in use' if names_available.empty?
 
-    name = names_available.shift
-    use_name!(name)
-
-    name
+    use_name!
   end
 
   def release!(name)
@@ -168,9 +163,13 @@ class RobotNames
     char_range.to_a.repeated_permutation(length).to_a.uniq
   end
 
-  def use_name!(name)
-    insert_before_idx = names_used.bsearch_index { |used| used > name } || names_used.size
+  def use_name!
+    name = names_available.shift
+    insert_before_idx =
+      names_used.bsearch_index { |used| used > name } ||
+      names_used.size
     names_used.insert(insert_before_idx, name)
+    name
   end
 
   def names_used_idx(name)
