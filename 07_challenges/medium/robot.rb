@@ -107,7 +107,7 @@ class Unique
       used_value > value
     end
     if insert_before_idx.nil?
-      used_values.push(value)
+      used_values.push(value) # This is a little faster than inserting at end
     else
       used_values.insert(insert_before_idx, value)
     end
