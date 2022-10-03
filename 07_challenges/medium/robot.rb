@@ -160,7 +160,11 @@ end
 # - `#name`: return current `@name` value.
 # - `#reset`: generate a new unique name and assign it to `@name`.
 class Robot
-  @@unique = Unique.new { RobotName.generate }
+  def self.initialize_factory!
+    @@unique = Unique.new { RobotName.generate }
+  end
+  initialize_factory!
+
   attr_reader :name
 
   def initialize

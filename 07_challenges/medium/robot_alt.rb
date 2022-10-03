@@ -96,7 +96,11 @@ class RobotNames
 end
 
 class Robot
-  @@robot_names = RobotNames.new
+  def self.initialize_factory!
+    @@robot_names = RobotNames.new
+  end
+  initialize_factory!
+
   attr_reader :name
 
   def initialize

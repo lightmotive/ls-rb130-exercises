@@ -7,8 +7,11 @@ require './robot_scalable'
 class RobotAltTest < Minitest::Test
   DIFFERENT_ROBOT_NAME_SEED = 1234
   SAME_INITIAL_ROBOT_NAME_SEED = 1000
-
   NAME_REGEXP = /\A[A-Z]{2}\d{3}\z/.freeze
+
+  def teardown
+    Robot.initialize_factory!
+  end
 
   def test_has_name
     assert_match NAME_REGEXP, Robot.new.name
@@ -41,5 +44,14 @@ class RobotAltTest < Minitest::Test
     Kernel.srand SAME_INITIAL_ROBOT_NAME_SEED
     name2 = Robot.new.name
     refute_equal name1, name2
+  end
+
+  def test_create_all_possible_robots
+    create_count = 676_000
+    robots = []
+    Robot.batch_init do
+      robots << Robot.new while robots.size < create_count
+    end
+    assert_equal(create_count, robots.map(&:name).uniq.size)
   end
 end

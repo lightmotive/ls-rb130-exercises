@@ -128,7 +128,10 @@ end
 # - `#reset`: release the current name and assign the next unused name to
 #   `@name`.
 class Robot
-  @@robot_names = RobotNames.new
+  def self.initialize_factory!
+    @@robot_names = RobotNames.new
+  end
+  initialize_factory!
 
   def self.batch_init(&block)
     raise StandardError, "Provide a block that initializes multiple #{name} instances" unless block_given?
