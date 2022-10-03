@@ -95,6 +95,14 @@ class RobotNames
   end
 end
 
+# Robot with a randomly generated and guaranteed-unique name with reset
+# capability. Uses `RobotName` to generate and track usage of names.
+#
+# Public behaviors:
+# - `::new`: assign unused name to `@name`.
+# - `#name`: return current `@name` value.
+# - `#reset`: release the current name and assign the next unused name to
+#   `@name`.
 class Robot
   def self.initialize_factory!
     @@robot_names = RobotNames.new

@@ -45,8 +45,9 @@
 # Public behaviors:
 # - `#use!`: shift a name from a pre-shuffled list of available names, then
 #   block that name from further use until released.
-# - `#batch_use!`: same as `#use!`, but internally optimized for batched
-#   invocation.
+# - `#batch_use!`: internally optimizes for rapid `use!` invocations, then
+#   yields to allow batch processing. Expensive data processing occurs once
+#   after yielding.
 # - `#release!(name)`: release a previously selected name; returns `self`.
 #
 # Possible name permutations:
@@ -120,7 +121,7 @@ class RobotNames
 end
 
 # Robot with a randomly generated and guaranteed-unique name with reset
-# capability. Uses `RobotName` to generate, use, and track usage of names.
+# capability. Uses `RobotName` to generate and track usage of names.
 #
 # Public behaviors:
 # - `::new`: assign unused name to `@name`.
