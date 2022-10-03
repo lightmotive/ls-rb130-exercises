@@ -10,7 +10,7 @@
 # The performance of this implementation is drastically better because it
 # doesn't need to randomly generate a name and check whether that name has
 # already been used. Here's a relative performance comparison
-# (host-dependent; these were run on a 2021 M1 Max MacBook Pro):
+# (host-dependent; these were run in a Docker container):
 
 # ** Test setup **
 # # Init performance:

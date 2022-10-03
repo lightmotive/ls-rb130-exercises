@@ -17,8 +17,8 @@
 # ./robot_alt.rb. Note that this test setup is slightly different: it uses
 # `Robot::batch_init { ... }` to activate "batch mode" in an encapsulated way.
 
-# # ** Test setup **
-# - Note `Robot.batch_init { ... }` usage.
+# ** Test setup **
+# # - Note `Robot.batch_init { ... }` usage.
 #
 # Init performance:
 # init_start_time = Time.now
