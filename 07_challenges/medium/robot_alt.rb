@@ -27,7 +27,7 @@
 # create_start_time = Time.now
 # puts "Generating #{generate_count} robots..."
 
-# robots.push(Robot.new) while robots.size < generate_count
+# robots << Robot.new while robots.size < generate_count
 
 # create_seconds = Time.now - create_start_time
 # puts "Generated #{robots.size} robots in #{create_seconds} seconds (~#{robots.size.fdiv(create_seconds).floor}/sec)"
@@ -124,7 +124,7 @@ class RobotNames
     raise StandardError, 'All names are in use' if names_available.empty?
 
     name = names_available.shift
-    names_used.push(name)
+    names_used << name
 
     name
   end
@@ -133,7 +133,7 @@ class RobotNames
     released_name = names_used.delete(name)
     return self if released_name.nil?
 
-    names_available.push(released_name)
+    names_available << released_name
     self
   end
 
