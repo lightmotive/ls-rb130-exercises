@@ -12,76 +12,7 @@
 # already been used. Here's a relative performance comparison
 # (host-dependent; these were run in a Docker container):
 
-# ** Test setup **
-# # Init performance:
-# init_start_time = Time.now
-
-# ** require test file here **
-
-# puts "Init seconds: #{Time.now - init_start_time}"
-
-# robots = []
-# generate_count = 676_000
-
-# # Create performance
-# create_start_time = Time.now
-# puts "Generating #{generate_count} robots..."
-
-# robots << Robot.new while robots.size < generate_count
-
-# create_seconds = Time.now - create_start_time
-# puts "Generated #{robots.size} robots in #{create_seconds} seconds (~#{robots.size.fdiv(create_seconds).floor}/sec)"
-# puts robots.map(&:name).uniq.size
-
-# # Reset performance
-# reset_start_time = Time.now
-# robots.shuffle!
-# reset_count = 10_000
-
-# puts "Resetting #{reset_count} robots..."
-# reset_count.times { robots.shift.reset }
-
-# reset_seconds = Time.now - reset_start_time
-# puts "Reset #{reset_count} robots in #{reset_seconds} seconds (#{reset_count.fdiv(reset_seconds)}/sec)"
-
-# ** robot.rb **
-# Create performance:
-#   Init (names are not pre-generated): negligible
-#   Generated 676,000 robots in 47-56 seconds (~12,000-14,000/second)
-#   - Analysis: reasonably fast implementation that slows to a crawl when all
-#     names are used because it takes time to randomly generate and check what
-#     hasn't already been used. Performance will be inconsistent because of that
-#     random nature and the binary search algorithm. However, startup time is
-#     not impacted, so this would be a good solution for small-scale scenarios.
-# Reset performance:
-#   X*X Did not finish in a reasonable timeframe; ~2 seconds/reset.
-#   - The slower creation time also slows the reset time. With 670K
-#     possibilities, the random name implementation would be a deal-breaker
-#     in scenarios requiring maximum scale.
-
-# ** robot_alt.rb **
-# Create performance:
-#   Init (generate and shuffle all possible names): ~0.63 seconds
-#   Generated 676,000 robots in ~0.23 seconds (~3,000,000/second)
-#   - The ~0.63 second startup performance penalty yields vastly improved
-#     creation time and consistent performance regardless of the number of
-#     active robots.
-# Reset performance:
-#   Reset 200 robots in ~4.5 seconds (~44/second)
-#   - Resetting robots is somewhat slow because it uses **Array#delete* instead
-#     of a binary search implementation. See ./robot_scalable.rb, which solves
-#     that scalability problem.
-
-# The robot_alt.rb performance boost carries these trade-offs because it
-# generates and randomizes all possible names at startup:
-# - Slightly slower startup time; probably not a problem in a scenario where a
-#   class/factory is initialized only occasionally.
-# - Higher initial memory usage; we're not storing a lot of data, so it likely
-#   wouldn't be an issue.
-
-# Choosing the best implementation would require knowing how many robots would
-# be online at once, and how quickly those robots would need to be brought
-# online.
+# ** See benchmark setup, comparison, and analysis in ./robot_bm.rb
 
 # This exploration also demonstrates the importance of encapsulation, especially
 # separation of concerns in this case:

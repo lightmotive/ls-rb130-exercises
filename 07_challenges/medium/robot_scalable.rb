@@ -1,73 +1,44 @@
 # frozen_string_literal: true
 
 # This is fully scalable alternative to the `robot_alt.rb` implementation.
-# The implementation includes Robot::batch_init that forwards a block to
-# RobotNames#batch_use!, which then:
-# - Activates batch mode, which changes the class behavior to simply append
-#   to `names_used` without sorting.
-#   - Appending a used name to `names_used` in sorted order slows the process
-#     considerably, even when using a binary search algorithm.
-# - Yields to a block that can instantiate multiple Robots quickly.
-# - Deactivates batch mode.
-# - Sorts `names_used` in place.
-#   - Sorting a 670K-element array once is much faster than sequentially
-#     inserting 670K elements into the correct sorted position.
+#
+# ** Scale problem overview **
+# Initializing many Robot instances in rapid succession, such as when
+# rebooting an entire Robot factory, is CPU-intensive. So is resetting a batch
+# of robots.
+#
+# The ./robot_alt.rb implementation solved the problem of quickly initializing
+# robots, but left one problem unsolved: efficiently resetting a batch of
+# robots. That's because it doesn't try to maintain `names_used` sort order,
+# which means it can't use **Array#bsearch** to delete names using a binary
+# search algorithm.
+#
+# In order to do that, the `use!` method needs to modify `names_used << name` to
+# insert a name at the sorted position using binary search. But doing that alone
+# would slow down batch initialization due to many sequential, and repetitive,
+# `names_used` array scans and inserts. To solve that completely, this
+# implementation makes 2 changes to ./robot_alt.rb:
+# - It uses binary search in `#use!` to insert used names in sorted order.
+# - It offers a `#batch_use!` method that essentially deactivates sorted insert
+#   into `names_used`. When the batch is complete, it sorts the `names_used`
+#   array once when batch mode ends. Sorting that array once is much faster than
+#   sequentially inserting many elements into the correct sorted position,
+#   especially for large arrays.
+#
+# ** Implementation overview **
+# - **Robot::batch_init** method accepts a block that initializes a batch of
+#   robots.
+#   - **Robot::batch_init** forwards the block to **RobotNames#batch_use!**,
+#     which activates batch mode in an encapsulated way and does the
+#     following within the `RobotNames` class:
+#     - Activates batch mode, which will temporarily modify `use!` method
+#       behavior to simply append to `names_used` array without maintaining
+#       sort order.
+#     - Yields to a block that can instantiate many Robots at once.
+#     - Deactivates batch mode.
+#     - Sorts `names_used` in place.
 
-# Compare the following performance with the benchmarks indicated in
-# ./robot_alt.rb. Note that this test setup is slightly different: it uses
-# `Robot::batch_init { ... }` to activate "batch mode" in an encapsulated way.
-
-# ** Test setup **
-# # - Note `Robot.batch_init { ... }` usage.
-#
-# Init performance:
-# init_start_time = Time.now
-#
-# ...require robot_scalable.rb here...
-#
-# puts "Init time: #{Time.now - init_start_time}"
-#
-# robots = []
-# generate_count = 676_000
-#
-# Create performance
-# create_start_time = Time.now
-# puts "Generating #{generate_count} robots..."
-#
-# Robot.batch_init do
-#   robots.push(Robot.new) while robots.size < generate_count
-# end
-#
-# create_seconds = Time.now - create_start_time
-# puts "Generated #{robots.size} robots in #{create_seconds} seconds (~#{robots.size.fdiv(create_seconds).floor}/sec)"
-# puts robots.map(&:name).uniq.size
-#
-# Reset performance
-# reset_start_time = Time.now
-# robots.shuffle!
-# reset_count = 20_000
-#
-# puts "Resetting #{reset_count} robots..."
-# reset_count.times { robots.shift.reset }
-#
-# reset_seconds = Time.now - reset_start_time
-# puts "Reset #{reset_count} robots in #{reset_seconds} seconds (~#{reset_count.fdiv(reset_seconds).floor}/sec)"
-
-# ** robot_scalable.rb **
-# Create performance:
-#   Init (generate and shuffle all possible names): ~0.64 seconds
-#   Generated 676,000 robots in ~0.45 seconds (~1,500,000/sec)
-#   - The ~0.64 second startup performance penalty yields vastly improved
-#     generation time and consistent performance regardless of the number of
-#     active robots.
-#   - It's interesting that this is slightly slower than the ./robot_alt.rb
-#     implementation because it has to check `is_batch_mode` with each `use!`
-#     invocation. The different is insignificant enough to ignore in this case.
-# Reset performance:
-#   Reset 20,000 robots in ~2.5 seconds (~8000/sec)
-#   - Now that we're using a fast name distribution algorithm and binary search
-#     for tracking used names, both batch initialization and batch resetting
-#     are fast.
+# ** See benchmark setup, comparison, and analysis in ./robot_bm.rb
 
 # Generate and track usage of Robot names matching /\A[A-Z]{2}\d{3}\z/.
 #
