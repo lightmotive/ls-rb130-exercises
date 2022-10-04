@@ -1,54 +1,46 @@
 # frozen_string_literal: true
 
-# This is fully scalable alternative to the `robot_alt.rb` implementation.
+# This is a better-encapsulated version of the `robot_alt.rb` implementation.
+# It also introduces new well-encapsulated functionality with classes that
+# conceptualize related groups of behaviors.
 #
-# ** Scale problem overview **
+# ** Scalability Considerations **
 # Initializing many Robot instances in rapid succession, such as when
-# rebooting an entire Robot factory, is CPU-intensive. So is resetting a batch
-# of robots.
+# bringing an entire Robot factory online, is CPU-intensive. So is resetting
+# a batch of robots.
 #
 # The ./robot_alt.rb implementation solved the problem of quickly initializing
-# robots, but left one problem unsolved: efficiently resetting a batch of
-# robots. That's because it doesn't try to maintain `names_used` sort order,
-# which means it can't use **Array#bsearch** to delete names using a binary
-# search algorithm.
+# robots, but left one problem unsolved: efficiently managing online robots.
+# This implementation encapsulates core program aspects and uses binary search
+# to support rapid robot management.
 #
-# In order to do that, the `use!` method needs to modify `names_used << name` to
-# insert a name at the sorted position using binary search. But doing that alone
-# would slow down batch initialization due to many sequential, and repetitive,
-# `names_used` array scans and inserts. To solve that completely, this
-# implementation makes 2 changes to ./robot_alt.rb:
-# - It uses binary search in `#use!` to insert used names in sorted order.
-# - It offers a `#batch_use!` method that essentially deactivates sorted insert
-#   into `names_used`. When the batch is complete, it sorts the `names_used`
-#   array once when batch mode ends. Sorting that array once is much faster than
-#   sequentially inserting many elements into the correct sorted position,
-#   especially for large arrays.
+# Managing many robots efficiently requires maintaining a sorted list of them so
+# they can be easily found using a binary search algorith. Ruby's core library
+# includes Array methods that make binary search easy: `bsearch` and
+# `bsearch_index`. Another Array method that's useful in conjunction with
+# `bsearch_index` is `insert`, which enables inserting a new value into sorted
+# position that's found using `bsearch_index`.
 #
-# ** Implementation overview **
-# - **Robot::batch_init** method accepts a block that initializes a batch of
-#   robots.
-#   - **Robot::batch_init** forwards the block to **RobotNames#batch_use!**,
-#     which activates batch mode in an encapsulated way and does the
-#     following within the `RobotNames` class:
-#     - Activates batch mode, which will temporarily modify `use!` method
-#       behavior to simply append to `names_used` array without maintaining
-#       sort order.
-#     - Yields to a block that can instantiate many Robots at once.
-#     - Deactivates batch mode.
-#     - Sorts `names_used` in place.
+# With robot management capabilities, the program also needs to avoid slowing
+# down batch robot maintenenace (e.g., quickly bringing an entire factory of
+# robots online or resetting a robot group) with many sequential and repetitive
+# `robots` array scan or sort operations. To accomplish that, the `RobotFactory`
+# needs to support "batch maintenance" that modifies "single maintenance"
+# behaviors as follows:
+# - Complete batch maintenance, yielding robot instances to a block if given.
+# - When batch processing is complete, complete post-batch operations like
+#   sorting the `robots` array.
+#   - As a relevant example, a single sort operation is much faster than trying
+#     to maintain sort positions throughout batch processing.
 
-# ** See benchmark setup, comparison, and analysis in ./robot_bm.rb
+# ** See benchmark setup, comparison, and analysis in ./robot_benchmark.rb **
 
 # Generate and track usage of Robot names matching /\A[A-Z]{2}\d{3}\z/.
 #
 # Public behaviors:
 # - `#use!`: shift a name from a pre-shuffled list of available names, then
 #   block that name from further use until released.
-# - `#batch_use!`: internally optimizes for rapid `use!` invocations, then
-#   yields to allow batch processing. Expensive data processing occurs once
-#   after yielding.
-# - `#release!(name)`: release a previously selected name; returns `self`.
+# - `#release!(name)`: append the name to list of available names; returns `self`.
 #
 # Possible name permutations:
 # - For each 2-upper-char letter combination, of which there are 676
@@ -57,53 +49,29 @@
 class RobotNames
   def initialize
     initialize_names!
-    @is_batch_mode = false
   end
 
   def use!
-    raise StandardError, 'All names are in use' if names_available.empty?
+    raise StandardError, 'All names are in use' if names.empty?
 
-    name = names_available.shift
-
-    if is_batch_mode then names_used << name
-    else
-      insert_before_idx = names_used.bsearch_index { |used| used > name } ||
-                          names_used.size
-      names_used.insert(insert_before_idx, name)
-    end
-
-    name
-  end
-
-  def batch_use!
-    raise StandardError, 'Provide a block that will invoke `use!` multiple times' unless block_given?
-
-    @is_batch_mode = true
-    yield
-    @is_batch_mode = false
-    names_used.sort!
+    names.shift
   end
 
   def release!(name)
-    delete_at_idx = names_used.bsearch_index { |used| name <=> used }
-    return if delete_at_idx.nil?
-
-    released_name = names_used.delete_at(delete_at_idx)
-    names_available << released_name
+    names << name
     self
   end
 
   private
 
-  attr_reader :names_available, :names_used, :is_batch_mode
+  attr_reader :names
 
   def initialize_names!
     name_possibilities = letter_digit_sequences(2, 3)
-    @names_available = name_possibilities.map do |letters, digits|
+    @names = name_possibilities.map do |letters, digits|
       letters.join + digits.join
     end
-    @names_available.shuffle!
-    @names_used = []
+    @names.shuffle!
   end
 
   def letter_digit_sequences(letter_count, digit_count)
@@ -120,37 +88,138 @@ class RobotNames
   end
 end
 
-# Robot with a randomly generated and guaranteed-unique name with reset
-# capability. Uses `RobotName` to generate and track usage of names.
+# A simple robot with a name (for now).
 #
 # Public behaviors:
-# - `::new`: assign unused name to `@name`.
+# - `::new(name)`: assign unique name.
 # - `#name`: return current `@name` value.
-# - `#reset`: release the current name and assign the next unused name to
-#   `@name`.
+# - `#reset(new_name)`: currently assigns the provided new_name; would also
+#   selectively reset internal state as the robot becomes more complex.
 class Robot
-  def self.initialize_factory!
-    @@robot_names = RobotNames.new
-  end
-  initialize_factory!
-
-  def self.batch_init(&block)
-    raise StandardError, "Provide a block that initializes multiple #{name} instances" unless block_given?
-
-    @@robot_names.batch_use!(&block)
-  end
-
   attr_reader :name
 
-  def initialize
-    @name = @@robot_names.use!
+  def initialize(name)
+    @name = name
   end
 
-  def reset
-    @@robot_names.release!(@name)
-    # Release current @name first to ensure all possible names are available.
-    # Alternatively, `release!` after `use!` to ensure the new name is
-    # different; that would reduce possible names by 1.
-    @name = @@robot_names.use!
+  def reset(new_name)
+    @name = new_name
+  end
+
+  def <=>(other)
+    name <=> other.name
+  end
+end
+
+class RobotList
+  include Enumerable
+
+  def initialize
+    @robots = []
+  end
+
+  def each(&block)
+    robots.each(&block)
+  end
+
+  def find(name)
+    robots.bsearch { |r| name <=> r.name }
+  end
+
+  def delete(robot)
+    delete_at_idx = robots.bsearch_index { |r| r.name <=> robot.name }
+    return nil if delete_at_idx.nil?
+
+    robots.delete_at(delete_at_idx)
+  end
+
+  def add(robot)
+    insert_before_idx = robots.bsearch_index { |r| r.name > robot.name } ||
+                        robots.size
+    robots.insert(insert_before_idx, robot)
+    robot
+  end
+
+  def add_batch(robot_array)
+    robots.concat(robot_array)
+    batch_maintenance_completed!
+  end
+
+  def batch_maintenance_completed!
+    robots.sort_by!(&:name)
+  end
+
+  private
+
+  attr_reader :robots
+end
+
+# Create and manage robots with individual and batch management capabilities.
+class RobotFactory
+  def initialize
+    @names = RobotNames.new
+    @robots = RobotList.new
+  end
+
+  def create_robot
+    robot = Robot.new(names.use!)
+    robots.add(robot)
+  end
+
+  def create_robots(count)
+    new_robots = []
+    count.times do
+      robot = Robot.new(names.use!)
+      yield robot if block_given?
+      new_robots << robot
+    end
+    robots.add_batch(new_robots)
+    new_robots
+  end
+
+  def reset_robot(robot_or_name)
+    robot = robot_by(robot_or_name)
+    return if robot.nil?
+
+    robots.delete(robot)
+    robot_reset!(robot)
+    robots.add(robot)
+  end
+
+  # Always returns Robot object array, even if array contains name strings.
+  def reset_robots(robot_or_name_array)
+    robots_reset = robot_or_name_array.map do |robot_or_name|
+      robot = robot_by(robot_or_name)
+      next if robot.nil?
+
+      robot_reset!(robot)
+      yield robot if block_given?
+      robot
+    end
+    robots.batch_maintenance_completed!
+    robots_reset
+  end
+
+  def shutdown_robot(name)
+    robot = robots.find(name)
+    return nil if robot.nil?
+
+    names.release!(robot.name)
+    robots.delete(robot)
+  end
+
+  private
+
+  attr_reader :names, :robots
+
+  def robot_reset!(robot)
+    names.release!(robot.name)
+    robot.reset(names.use!)
+  end
+
+  def robot_by(element)
+    return element if element.instance_of?(Robot)
+
+    robots.find(element)
   end
 end
