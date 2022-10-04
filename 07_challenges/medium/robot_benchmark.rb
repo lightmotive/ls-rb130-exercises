@@ -1,53 +1,104 @@
 # frozen_string_literal: true
 
 # ** Benchmark setup **
-class RobotBenchmark
-  def initialize(load_path, create_count: 676_000, reset_count: 100,
-                 create_robots_proc: nil)
+class RobotBenchmarkConfig
+  attr_reader :create_count, :reset_count, :robots
+
+  def initialize(load_path, create_count: 676_000, reset_count: 5)
     @load_path = load_path
     @create_count = create_count
     @reset_count = reset_count
-    @create_robots_proc = create_robots_proc ||
-                          proc { |create_robots| create_robots.call }
     @robots = []
   end
 
-  def run
+  def init
     puts "** #{load_path} Benchmark **"
+    load load_path
+  end
 
-    bm_implementation
+  def create
+    puts "Generating #{create_count} robots..."
+  end
+
+  def reset
+    puts "Resetting #{reset_count} robots..."
+  end
+
+  protected
+
+  attr_reader :load_path
+end
+
+class RobotBenchmarkNonFactoryConfig < RobotBenchmarkConfig
+  def create
+    super
+    robots << Robot.new while robots.size < create_count
+    self
+  end
+
+  def reset
+    super
+    reset_count.times { |idx| robots[idx].reset }
+  end
+end
+
+class RobotBenchmarkFactoryConfig < RobotBenchmarkConfig
+  def init
+    super
+    @factory = RobotFactory.new
+  end
+
+  def create
+    super
+    @factory.create_robots(create_count)
+  end
+
+  def reset
+    super
+    @factory.reset_robots(@factory[0...reset_count])
+  end
+
+  def robots
+    @factory.robots_all
+  end
+
+  private
+
+  attr_reader :factory
+end
+
+class RobotBenchmark
+  def initialize(config)
+    @config = config
+  end
+
+  def run
+    bm_init
     bm_create
     bm_reset
   end
 
   private
 
-  attr_reader :load_path, :create_count, :reset_count,
-              :create_robots_proc, :robots
+  attr_reader :config
 
-  def bm_implementation
+  def bm_init
     start_time = Time.now
-    load load_path
+    config.init
     puts "Init: #{seconds_round_fmt(Time.now - start_time, 3)} seconds"
   end
 
   def bm_create
     start_time = Time.now
-    puts "Generating #{create_count} robots..."
-    create_robots_proc.call(method(:create_robots!))
-    format_result('Generated', robots.size, Time.now - start_time)
-  end
-
-  def create_robots!
-    robots << Robot.new while robots.size < create_count
+    config.create
+    format_result('Generated', config.robots.size, Time.now - start_time)
   end
 
   def bm_reset
-    robots.shuffle!
+    config.robots.shuffle!
     start_time = Time.now
-    puts "Resetting #{reset_count} robots..."
-    reset_count.times { robots.shift.reset }
-    format_result('Reset', reset_count, Time.now - start_time)
+    config.reset
+    format_result('Reset', config.reset_count, Time.now - start_time)
   end
 
   def format_result(title, count, seconds)
@@ -62,16 +113,15 @@ class RobotBenchmark
 end
 
 case ARGV[0]
-when 'robot' then RobotBenchmark.new('./robot.rb', reset_count: 5).run
-when 'robot_alt' then RobotBenchmark.new('./robot_alt.rb', reset_count: 50_000).run
-when 'robot_scalable'
-  RobotBenchmark.new('./robot_scalable.rb',
-                     reset_count: 20_000,
-                     create_robots_proc: proc do |create_robots|
-                       Robot.batch_init do
-                         create_robots.call
-                       end
-                     end).run
+when 'robot' then RobotBenchmark.new(
+  RobotBenchmarkNonFactoryConfig.new('./robot.rb')
+).run
+when 'robot_alt' then RobotBenchmark.new(
+  RobotBenchmarkNonFactoryConfig.new('./robot_alt.rb', reset_count: 50_000)
+).run
+when 'robot_scalable' then RobotBenchmark.new(
+  RobotBenchmarkFactoryConfig.new('./robot_scalable.rb', reset_count: 50_000)
+).run
 end
 
 # ***

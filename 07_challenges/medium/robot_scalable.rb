@@ -149,6 +149,14 @@ class RobotList
     robots.sort_by!(&:name)
   end
 
+  def [](*args)
+    robots.[](*args)
+  end
+
+  def to_a
+    robots.dup
+  end
+
   private
 
   attr_reader :robots
@@ -206,6 +214,14 @@ class RobotFactory
 
     names.release!(robot.name)
     robots.delete(robot)
+  end
+
+  def [](*args)
+    robots.[](*args)
+  end
+
+  def robots_all
+    robots.to_a
   end
 
   private
