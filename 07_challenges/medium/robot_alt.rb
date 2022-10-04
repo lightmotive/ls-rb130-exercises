@@ -4,8 +4,8 @@
 # defines the same public interface. For this implementation, we don't need the
 # added complexity of a `Unique` class. `RobotName` provides a names from a
 # pre-generated and shuffled list without tracking what was used.
-# A separate class should provide used name, or "online robots", functionality,
-# e.g., `RobotFactory`.
+# A separate class may provide "online robots" functionality e.g.,
+# `RobotFactory`.
 
 # ** See benchmark setup, comparison, and analysis in ./robot_benchmark.rb **
 
