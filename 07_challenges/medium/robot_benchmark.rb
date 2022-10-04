@@ -170,14 +170,14 @@ end
 # robot_scalable.rb performance analysis
 # - cmd: ruby robot_benchmark.rb robot_scalable
 # ***
-# Init: 0.662 seconds
-# Generated 676000 robots in ~0.44 seconds (~1520558/sec)
-# Reset 20000 robots in ~2.63 seconds (~7592/sec)
+# Init: 0.656 seconds
+# Generated 676000 robots in ~0.54 seconds (~1243186/sec)
+# Reset 50000 robots in ~0.24 seconds (~205215/sec)
 #
 # Analysis:
 # - Compared to ./robot_alt.rb, this implementation requires slightly more time
-#   (~0.25 seconds) to batch-generate all robots because it tracks used names.
-#   Binary search helps with that feature's performance.
+#   to batch-generate/reset robots because it tracks used names. Binary search
+#   minimizes that added feature's performance impact.
 
 # Choosing the best implementation would require knowing how many robots would
 # be online at once, and how quickly those robots would need to be brought
