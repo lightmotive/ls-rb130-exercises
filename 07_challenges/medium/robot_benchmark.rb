@@ -2,16 +2,18 @@
 
 # ** Benchmark setup **
 class RobotBenchmark
-  def initialize(require_relative_name, create_count: 676_000, reset_count: 100)
-    @require_relative_name = require_relative_name
+  def initialize(load_path, create_count: 676_000, reset_count: 100,
+                 create_robots_proc: nil)
+    @load_path = load_path
     @create_count = create_count
     @reset_count = reset_count
-    @robot_class = nil # Required on `run`
+    @create_robots_proc = create_robots_proc ||
+                          proc { |create_robots| create_robots.call }
     @robots = []
   end
 
   def run
-    puts "** #{require_relative_name} Benchmark **"
+    puts "** #{load_path} Benchmark **"
 
     bm_implementation
     bm_create
@@ -20,39 +22,24 @@ class RobotBenchmark
 
   private
 
-  attr_reader :require_relative_name, :create_count, :reset_count,
-              :robot_class, :robots
+  attr_reader :load_path, :create_count, :reset_count,
+              :create_robots_proc, :robots
 
   def bm_implementation
     start_time = Time.now
-    require_relative require_relative_name
-    @robot_class = Robot
+    load load_path
     puts "Init: #{seconds_round_fmt(Time.now - start_time, 3)} seconds"
   end
 
   def bm_create
     start_time = Time.now
     puts "Generating #{create_count} robots..."
-    create_robots!
-    format_bm('Generated', robots.size, Time.now - start_time)
+    create_robots_proc.call(method(:create_robots!))
+    format_result('Generated', robots.size, Time.now - start_time)
   end
 
   def create_robots!
-    case require_relative_name
-    when 'robot_scalable' then create_robots_with_batch_init
-    else
-      create_robots_directly
-    end
-  end
-
-  def create_robots_directly
-    robots << robot_class.new while robots.size < create_count
-  end
-
-  def create_robots_with_batch_init
-    robot_class.batch_init do
-      robots.push(robot_class.new) while robots.size < create_count
-    end
+    robots << Robot.new while robots.size < create_count
   end
 
   def bm_reset
@@ -60,10 +47,10 @@ class RobotBenchmark
     start_time = Time.now
     puts "Resetting #{reset_count} robots..."
     reset_count.times { robots.shift.reset }
-    format_bm('Reset', reset_count, Time.now - start_time)
+    format_result('Reset', reset_count, Time.now - start_time)
   end
 
-  def format_bm(title, count, seconds)
+  def format_result(title, count, seconds)
     puts "#{title} #{count} robots in " \
          "~#{seconds_round_fmt(seconds, 2)} seconds " \
          "(~#{count.fdiv(seconds).floor}/sec)"
@@ -74,14 +61,22 @@ class RobotBenchmark
   end
 end
 
-RobotBenchmark.new('robot', reset_count: 10).run
-puts "\n"
-RobotBenchmark.new('robot_alt', reset_count: 200).run
-puts "\n"
-RobotBenchmark.new('robot_scalable', reset_count: 20_000).run
+case ARGV[0]
+when 'robot' then RobotBenchmark.new('./robot.rb', reset_count: 5).run
+when 'robot_alt' then RobotBenchmark.new('./robot_alt.rb', reset_count: 100).run
+when 'robot_scalable'
+  RobotBenchmark.new('./robot_scalable.rb',
+                     reset_count: 20_000,
+                     create_robots_proc: proc do |create_robots|
+                       Robot.batch_init do
+                         create_robots.call
+                       end
+                     end).run
+end
 
 # ***
 # robot.rb performance analysis
+# - cmd: ruby robot_benchmark.rb robot
 # ***
 # Init: 0.005 seconds
 # Generated 676000 robots in ~50.71 seconds (~13330/sec)
@@ -101,10 +96,11 @@ RobotBenchmark.new('robot_scalable', reset_count: 20_000).run
 
 # ***
 # robot_alt.rb performance analysis
+# - cmd: ruby robot_benchmark.rb robot_alt
 # ***
-# Init: 0.658 seconds
-# Generated 676000 robots in ~0.33 seconds (~2057247/sec)
-# Reset 200 robots in ~7.35 seconds (~27/sec)
+# Init: 0.627 seconds
+# Generated 676000 robots in ~0.23 seconds (~2994063/sec)
+# Reset 100 robots in ~2.48 seconds (~40/sec)
 #
 # Analysis:
 # - Init is slightly slower because it generates and shuffles all possible
@@ -124,10 +120,11 @@ RobotBenchmark.new('robot_scalable', reset_count: 20_000).run
 
 # ***
 # robot_scalable.rb performance analysis
+# - cmd: ruby robot_benchmark.rb robot_scalable
 # ***
-# Init: 0.709 seconds
-# Generated 676000 robots in ~0.41 seconds (~1638265/sec)
-# Reset 20000 robots in ~2.56 seconds (~7816/sec)
+# Init: 0.662 seconds
+# Generated 676000 robots in ~0.44 seconds (~1520558/sec)
+# Reset 20000 robots in ~2.63 seconds (~7592/sec)
 #
 # Analysis:
 # - Compared to ./robot_alt.rb, this implementation requires slightly more time
