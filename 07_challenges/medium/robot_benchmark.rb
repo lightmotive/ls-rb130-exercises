@@ -63,7 +63,7 @@ end
 
 case ARGV[0]
 when 'robot' then RobotBenchmark.new('./robot.rb', reset_count: 5).run
-when 'robot_alt' then RobotBenchmark.new('./robot_alt.rb', reset_count: 100).run
+when 'robot_alt' then RobotBenchmark.new('./robot_alt.rb', reset_count: 50_000).run
 when 'robot_scalable'
   RobotBenchmark.new('./robot_scalable.rb',
                      reset_count: 20_000,
@@ -98,18 +98,16 @@ end
 # robot_alt.rb performance analysis
 # - cmd: ruby robot_benchmark.rb robot_alt
 # ***
-# Init: 0.627 seconds
-# Generated 676000 robots in ~0.23 seconds (~2994063/sec)
-# Reset 100 robots in ~2.48 seconds (~40/sec)
+# Init: 0.636 seconds
+# Generated 676000 robots in ~0.17 seconds (~3970996/sec)
+# Reset 50000 robots in ~0.02 seconds (~2233476/sec)
 #
 # Analysis:
 # - Init is slightly slower because it generates and shuffles all possible
 #   names.
 # - The startup performance penalty then yields vastly improved creation time
 #   and consistent performance regardless of the number of active robots.
-# - Reset time is improved thanks to faster creation time, but still somewhat
-#   slow because it uses **Array#delete* instead of a binary search
-#   implementation. ./robot_scalable.rb solves that.
+# - Reset time is virtually the same as creation time.
 #
 # Trade-offs due to generating and randomizing all possible names at program
 # start:
@@ -128,11 +126,8 @@ end
 #
 # Analysis:
 # - Compared to ./robot_alt.rb, this implementation requires slightly more time
-#   (~0.25 seconds) to batch-generate all robots because it sorts used names
-#   once at the end of the batch.
-# - Now that we're using a fast name distribution algorithm and binary search
-#   for tracking used names, both batch initialization and batch resetting
-#   are fast.
+#   (~0.25 seconds) to batch-generate all robots because it tracks used names.
+#   Binary search helps with that feature's performance.
 
 # Choosing the best implementation would require knowing how many robots would
 # be online at once, and how quickly those robots would need to be brought

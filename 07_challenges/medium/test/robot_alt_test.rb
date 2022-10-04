@@ -9,10 +9,6 @@ class RobotAltTest < Minitest::Test
   SAME_INITIAL_ROBOT_NAME_SEED = 1000
   NAME_REGEXP = /\A[A-Z]{2}\d{3}\z/.freeze
 
-  def teardown
-    Robot.initialize_factory!
-  end
-
   def test_has_name
     assert_match NAME_REGEXP, Robot.new.name
   end
@@ -47,9 +43,11 @@ class RobotAltTest < Minitest::Test
   end
 
   def test_create_all_possible_robots
+    Robot.initialize_factory!
     create_count = 676_000
     robots = []
     robots << Robot.new while robots.size < create_count
     assert_equal(create_count, robots.map(&:name).uniq.size)
+    Robot.initialize_factory!
   end
 end
