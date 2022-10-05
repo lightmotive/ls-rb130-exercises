@@ -32,10 +32,11 @@
 # - `#release!(name)`: add the name back to the list of available names;
 #   returns `self`.
 #
-# Possible name permutations:
-# - For each 2-upper-char letter combination, of which there are 676
-#   permutations (26^2), there are 1,000 3-digit number permutations (10^3).
-#   676 * 1000 = 676,000 possible names.
+# Possible name permutations example:
+# - A pattern of 2 upper-case letters comprises 676 permutations (26^2).
+# - A pattern of 3 digits comprises 1,000 permutations (10^3).
+# - The product of those two permutation sets comprises all possible names this
+#   class can generate: 676 * 1000 = 676,000.
 class RobotNames
   def initialize
     initialize_names!

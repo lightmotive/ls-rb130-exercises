@@ -119,15 +119,11 @@ end
 # Public behaviors:
 # - `::generate`: generate and return the random name.
 #
-# Possible name permutations:
-# - For each 2-upper-char letter combination (676 permutations), there are
-#   1,000 3-digit number permutations. 676 * 1000 = 676,000 possible names.
-# - Randomly generating a name and using `Unique` would slow to crawl with
-#   thousands of names to check after each generation, not to mention retrying
-#   random generation when a randomly generated name is already taken.
-#   Therefore, it would be better to generate all possible permutations, then
-#   sample + flag the name as taken. See robot_fast.rb in this file's
-#   directory for that implementation.
+# Possible name permutations example:
+# - A pattern of 2 upper-case letters comprises 676 permutations (26^2).
+# - A pattern of 3 digits comprises 1,000 permutations (10^3).
+# - The product of those two permutation sets comprises all possible names this
+#   class can generate: 676 * 1000 = 676,000.
 class RobotName
   def self.generate
     name = String.new
